@@ -1,0 +1,42 @@
+{
+  "name": "agent",
+  "version": "1.2.0",
+  "description": "Evidence-grounded Vedic astrology guidance with private hosted chart records.",
+  "author": {
+    "name": "thaletto",
+    "url": "https://github.com/thaletto"
+  },
+  "homepage": "https://ascendant-docs.vercel.app",
+  "repository": "https://github.com/thaletto/ascendant-agents",
+  "license": "AGPL-3.0",
+  "keywords": [
+    "astrology",
+    "vedic-astrology",
+    "birth-chart",
+    "transits",
+    "dashas",
+    "horoscope"
+  ],
+  "skills": "./ascendant/skills/",
+  "apps": "./.app.json",
+  "interface": {
+    "displayName": "Ascendant",
+    "shortDescription": "Explore private charts and planetary transits.",
+    "longDescription": "Create private, consent-attested chart records and use evidence-grounded Vedic astrology skills for career, education, health, finance, family, relationships, marriage, property, and transits.",
+    "developerName": "thaletto",
+    "category": "Astrology",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "websiteURL": "https://ascendant-docs.vercel.app",
+    "privacyPolicyURL": "https://ascendant-docs.vercel.app/docs/privacy",
+    "termsOfServiceURL": "https://ascendant-docs.vercel.app/docs/terms",
+    "defaultPrompt": [
+      "Analyze my saved birth chart",
+      "Show my current planetary transits",
+      "Save a new person's birth details"
+    ],
+    "brandColor": "#6D4AFF"
+  }
+}

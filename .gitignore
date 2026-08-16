@@ -1,0 +1,56 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pdb
+
+# Virtual environment
+venv/
+.env/
+.venv/
+
+# SQLite database
+*.db
+*.sqlite3
+
+# Environment variables
+.env.*
+.env.*.*
+.envrc
+.env
+
+# Logs
+*.log
+logs/
+
+# Pytest / coverage
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Build / packaging
+build/
+dist/
+*.egg-info/
+.next/
+.source/
+node_modules/
+.vercel/
+.output/
+.nitro/
+.tanstack/
+
+# Sample Files
+sample/
+
+# IDE
+.DS_Store
+.vscode/
+.zed/
+.cursor/
+
+# Personal Information
+persons/
+person/

@@ -1,0 +1,18 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    {
+      "source": "/.well-known/oauth-protected-resource/:path*",
+      "destination": "/api/.well-known/oauth-protected-resource/:path*"
+    },
+    {
+      "source": "/.well-known/oauth-authorization-server",
+      "destination": "/api/.well-known/oauth-authorization-server"
+    }
+  ],
+  "functions": {
+    "app.py": {
+      "includeFiles": "../plugins/agent/**"
+    }
+  }
+}

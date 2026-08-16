@@ -1,0 +1,54 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ascendant-mcp"
+version = "0.1.0"
+description = "Hosted FastMCP connector for Ascendant"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "astro-ascendant @ git+https://github.com/thaletto/ascendant.git@5b792182c87a9555ab785f32a235d2bf0b7676fb",
+    "fastapi==0.141.1",
+    "fastmcp==3.4.7",
+    "psycopg[binary]==3.3.4",
+]
+
+[project.optional-dependencies]
+dev = [
+    "basedpyright>=1.31,<2",
+    "httpx>=0.28,<1",
+    "joserfc>=1.5,<2",
+    "pytest>=9,<10",
+    "uvicorn>=0.41,<1",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["ascendant_mcp*"]
+
+[tool.setuptools.package-data]
+ascendant_mcp = ["py.typed"]
+
+[tool.basedpyright]
+typeCheckingMode = "strict"
+pythonVersion = "3.11"
+include = [
+    "src",
+    "app.py",
+    "../tests/test_agent_plugin.py",
+    "../tests/test_mcp_service.py",
+]
+exclude = ["**/__pycache__", "**/.venv"]
+extraPaths = [".."]
+venvPath = ".."
+venv = ".venv"
+
+reportUnusedCallResult = "error"
+reportAny = "error"
+reportExplicitAny = "error"
+reportImplicitStringConcatenation = "error"
+reportMissingSuperCall = "error"
+reportMissingTypeStubs = "none"
+reportUninitializedInstanceVariable = "error"
