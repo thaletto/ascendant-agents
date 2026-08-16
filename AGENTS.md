@@ -1,18 +1,16 @@
-# Ascendant Agents repository guidance
+## Agent skills
 
-## Issue tracker
+### Issue tracker
 
-Use Linear under the Ascendant project for issues, specs, progress notes, and
-completion. Preserve native blocker relationships between migration tickets.
+Use Linear under the Ascendant project for issues and specs. See
+`docs/agents/issue-tracker.md`.
 
-## Domain context
+### Triage labels
 
-Read the root `CONTEXT.md` before changing skills, hosted MCP behavior, or
-language that names Jyotisha concepts. Keep the distributed skills
-self-contained under `plugins/agent/ascendant/`.
+Use `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, and
+`wontfix`. See `docs/agents/triage-labels.md`.
 
-## Private data
+### Domain docs
 
-Never commit local `persons/` records or MCP environment files. Treat birth
-details, generated chart artifacts, OAuth settings, and service credentials as
-private local data.
+This is a single-context repository. Read root `CONTEXT.md` and relevant ADRs
+before domain work. See `docs/agents/domain.md`.
