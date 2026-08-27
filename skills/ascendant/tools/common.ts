@@ -2,6 +2,7 @@ import {
   NodeFileSystem,
   NodePath,
 } from "@effect/platform-node-shared";
+import { decode, encode } from "@toon-format/toon";
 import { AstroParams, Chart } from "astro-ascendant";
 import * as Swisseph from "astro-ascendant/swisseph";
 import {
@@ -74,8 +75,16 @@ export class PersonRecordConflict extends Schema.TaggedError<PersonRecordConflic
   },
 ) {}
 
-export class JsonEncodingError extends Schema.TaggedError<JsonEncodingError>()(
-  "JsonEncodingError",
+export class ToonEncodingError extends Schema.TaggedError<ToonEncodingError>()(
+  "ToonEncodingError",
+  {
+    file: Schema.String,
+    message: Schema.String,
+  },
+) {}
+
+export class ToonDecodingError extends Schema.TaggedError<ToonDecodingError>()(
+  "ToonDecodingError",
   {
     file: Schema.String,
     message: Schema.String,
@@ -125,28 +134,28 @@ export function personRecordMatches(
   );
 }
 
-export const writeJson = Effect.fn("Ascendant.writeJson")(function* (
+export const writeToon = Effect.fn("Ascendant.writeToon")(function* (
   file: string,
   value: unknown,
 ) {
   const fs = yield* FileSystem.FileSystem;
-  const json = yield* Effect.try({
-    try: () => `${JSON.stringify(value, null, 2)}\n`,
+  const toon = yield* Effect.try({
+    try: () => `${encode(value)}\n`,
     catch: (cause) =>
-      new JsonEncodingError({
+      new ToonEncodingError({
         file,
         message: String(cause),
       }),
   });
 
-  yield* fs.writeFileString(file, json);
+  yield* fs.writeFileString(file, toon);
 });
 
 export const readStoredPerson = Effect.fn("Ascendant.readStoredPerson")(
   function* (name: PersonName) {
     const fs = yield* FileSystem.FileSystem;
     const path = yield* Path.Path;
-    const inputFile = path.join("persons", name, "input.json");
+    const inputFile = path.join("persons", name, "input.toon");
 
     if (!(yield* fs.exists(inputFile))) {
       return yield* new PersonRecordNotFound({
@@ -156,8 +165,26 @@ export const readStoredPerson = Effect.fn("Ascendant.readStoredPerson")(
     }
 
     const contents = yield* fs.readFileString(inputFile);
-    return yield* Schema.decodeUnknownEffect(
-      Schema.fromJsonString(StoredPerson),
-    )(contents);
+    const decoded = yield* Effect.try({
+      try: () => decode(contents),
+      catch: (cause) =>
+        new ToonDecodingError({
+          file: inputFile,
+          message: String(cause),
+        }),
+    });
+    return yield* Schema.decodeUnknownEffect(StoredPerson)(decoded);
   },
 );
+
+export const readLegacyStoredPerson = Effect.fn(
+  "Ascendant.readLegacyStoredPerson",
+)(function* (name: PersonName) {
+  const fs = yield* FileSystem.FileSystem;
+  const path = yield* Path.Path;
+  const inputFile = path.join("persons", name, "input.json");
+  const contents = yield* fs.readFileString(inputFile);
+  return yield* Schema.decodeUnknownEffect(
+    Schema.fromJsonString(StoredPerson),
+  )(contents);
+});

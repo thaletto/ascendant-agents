@@ -2,7 +2,7 @@
     "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
     "name": "ascendant",
     "description": "Laxman's agent skills for Astrological analysis of Birth Chart, Transits, Vimshottari Dasha, Ashtavarga Scores etc...",
-    "version": "1.0.2",
+    "version": "1.1.0",
     "author": {
         "name": "Laxman K R",
         "email": "krlaxman03@gmail.com",

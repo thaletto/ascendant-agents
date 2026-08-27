@@ -21,8 +21,9 @@ import {
   type PersonName,
   PersonRecordConflict,
   personRecordMatches,
+  readLegacyStoredPerson,
   readStoredPerson,
-  writeJson,
+  writeToon,
   type StoredPerson,
 } from "./common.ts";
 
@@ -67,16 +68,44 @@ function formatDasha(
   }));
 }
 
+function legacyArtifactFiles(
+  path: Path.Path,
+  personDirectory: string,
+): ReadonlyArray<string> {
+  return [
+    path.join(personDirectory, "input.json"),
+    path.join(personDirectory, "dasha.json"),
+    path.join(personDirectory, "sav.json"),
+    path.join(personDirectory, "yoga.json"),
+    ...Chart.Division.literals.map((division) =>
+      path.join(personDirectory, "charts", `D${division}.json`),
+    ),
+    ...[
+      "chara-karakas",
+      "rashi-drishti",
+      "karakamsha",
+      "arudha-padas",
+      "upapada",
+      "argala",
+    ].map((artifact) =>
+      path.join(personDirectory, "jaimini", `${artifact}.json`),
+    ),
+  ];
+}
+
 export const initializePerson = Effect.fn("Ascendant.initializePerson")(
   function* (storedPerson: StoredPerson) {
     const fs = yield* FileSystem.FileSystem;
     const path = yield* Path.Path;
     const personDirectory = path.join("persons", storedPerson.name);
-    const inputFile = path.join(personDirectory, "input.json");
+    const inputFile = path.join(personDirectory, "input.toon");
+    const legacyInputFile = path.join(personDirectory, "input.json");
     const personDirectoryExists = yield* fs.exists(personDirectory);
 
     if (personDirectoryExists) {
-      if (!(yield* fs.exists(inputFile))) {
+      const inputExists = yield* fs.exists(inputFile);
+      const legacyInputExists = yield* fs.exists(legacyInputFile);
+      if (!inputExists && !legacyInputExists) {
         return yield* new PersonRecordConflict({
           directory: personDirectory,
           message:
@@ -84,7 +113,9 @@ export const initializePerson = Effect.fn("Ascendant.initializePerson")(
         });
       }
 
-      const current = yield* readStoredPerson(storedPerson.name);
+      const current = inputExists
+        ? yield* readStoredPerson(storedPerson.name)
+        : yield* readLegacyStoredPerson(storedPerson.name);
       if (!personRecordMatches(current, storedPerson)) {
         return yield* new PersonRecordConflict({
           directory: personDirectory,
@@ -157,8 +188,8 @@ export const initializePerson = Effect.fn("Ascendant.initializePerson")(
 
     yield* Effect.all(
       calculation.charts.map((chart) =>
-        writeJson(
-          path.join(chartsDirectory, `D${chart.division}.json`),
+        writeToon(
+          path.join(chartsDirectory, `D${chart.division}.toon`),
           chart,
         ),
       ),
@@ -167,32 +198,39 @@ export const initializePerson = Effect.fn("Ascendant.initializePerson")(
 
     yield* Effect.all(
       [
-        writeJson(inputFile, storedPerson),
-        writeJson(path.join(personDirectory, "dasha.json"), formatDasha(dasha)),
-        writeJson(path.join(personDirectory, "sav.json"), sav),
-        writeJson(path.join(personDirectory, "yoga.json"), {
+        writeToon(inputFile, storedPerson),
+        writeToon(path.join(personDirectory, "dasha.toon"), formatDasha(dasha)),
+        writeToon(path.join(personDirectory, "sav.toon"), sav),
+        writeToon(path.join(personDirectory, "yoga.toon"), {
           provenance: yoga.provenance,
           results: presentYogas,
         }),
-        writeJson(
-          path.join(jaiminiDirectory, "chara-karakas.json"),
+        writeToon(
+          path.join(jaiminiDirectory, "chara-karakas.toon"),
           charaKarakas,
         ),
-        writeJson(
-          path.join(jaiminiDirectory, "rashi-drishti.json"),
+        writeToon(
+          path.join(jaiminiDirectory, "rashi-drishti.toon"),
           rashiDrishti,
         ),
-        writeJson(
-          path.join(jaiminiDirectory, "karakamsha.json"),
+        writeToon(
+          path.join(jaiminiDirectory, "karakamsha.toon"),
           karakamsha,
         ),
-        writeJson(
-          path.join(jaiminiDirectory, "arudha-padas.json"),
+        writeToon(
+          path.join(jaiminiDirectory, "arudha-padas.toon"),
           arudhaPadas,
         ),
-        writeJson(path.join(jaiminiDirectory, "upapada.json"), upapada),
-        writeJson(path.join(jaiminiDirectory, "argala.json"), argala),
+        writeToon(path.join(jaiminiDirectory, "upapada.toon"), upapada),
+        writeToon(path.join(jaiminiDirectory, "argala.toon"), argala),
       ],
+      { concurrency: "unbounded" },
+    );
+
+    yield* Effect.all(
+      legacyArtifactFiles(path, personDirectory).map((file) =>
+        fs.remove(file, { force: true }),
+      ),
       { concurrency: "unbounded" },
     );
 
