@@ -242,7 +242,7 @@ const homeView = Effect.fn("Ascendant.homeView")(function* () {
 
   const entries = yield* fs.readDirectory(personsDirectory);
   const records = yield* Effect.filter(entries, (entry) =>
-    fs.exists(path.join(personsDirectory, entry, "input.toon")),
+    fs.exists(path.join(personsDirectory, entry, "input.txt")),
   );
 
   return {

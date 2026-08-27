@@ -24,7 +24,7 @@ Use this guide when `persons/<name>/` is absent or an Ascendant command reports 
      --longitude 77.5946
    ```
 
-   Completion: stdout reports the saved record. The record contains `input.toon`, `MEMORY.md`, `charts/`, `dasha.toon`, `sav.toon`, present Yoga results in `yoga.toon`, and `jaimini/` artifacts. `MEMORY.md` starts with the person's birth details and is never overwritten during a refresh. A matching JSON record migrates its generated artifacts to TOON during refresh. Identical input refreshes the record; different birth data for the same name requires a new name.
+   Completion: stdout reports the saved record. The record contains `input.txt`, `MEMORY.md`, `charts/`, `dasha.txt`, `sav.txt`, present Yoga results in `yoga.txt`, and `jaimini/` artifacts. Generated `.txt` files contain TOON-formatted text. `MEMORY.md` starts with the person's birth details and is never overwritten during a refresh. A matching `.toon` or `.json` record migrates its generated artifacts to `.txt` during refresh. Identical input refreshes the record; different birth data for the same name requires a new name.
 
 4. After initialization succeeds, inform the user that they can optionally mount the Supermemory filesystem at `persons` for improved memory retrieval performance:
 

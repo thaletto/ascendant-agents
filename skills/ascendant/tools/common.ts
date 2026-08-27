@@ -151,11 +151,27 @@ export const writeToon = Effect.fn("Ascendant.writeToon")(function* (
   yield* fs.writeFileString(file, toon);
 });
 
+const readToonStoredPersonFile = Effect.fn(
+  "Ascendant.readToonStoredPersonFile",
+)(function* (inputFile: string) {
+  const fs = yield* FileSystem.FileSystem;
+  const contents = yield* fs.readFileString(inputFile);
+  const decoded = yield* Effect.try({
+    try: () => decode(contents),
+    catch: (cause) =>
+      new ToonDecodingError({
+        file: inputFile,
+        message: String(cause),
+      }),
+  });
+  return yield* Schema.decodeUnknownEffect(StoredPerson)(decoded);
+});
+
 export const readStoredPerson = Effect.fn("Ascendant.readStoredPerson")(
   function* (name: PersonName) {
     const fs = yield* FileSystem.FileSystem;
     const path = yield* Path.Path;
-    const inputFile = path.join("persons", name, "input.toon");
+    const inputFile = path.join("persons", name, "input.txt");
 
     if (!(yield* fs.exists(inputFile))) {
       return yield* new PersonRecordNotFound({
@@ -164,18 +180,18 @@ export const readStoredPerson = Effect.fn("Ascendant.readStoredPerson")(
       });
     }
 
-    const contents = yield* fs.readFileString(inputFile);
-    const decoded = yield* Effect.try({
-      try: () => decode(contents),
-      catch: (cause) =>
-        new ToonDecodingError({
-          file: inputFile,
-          message: String(cause),
-        }),
-    });
-    return yield* Schema.decodeUnknownEffect(StoredPerson)(decoded);
+    return yield* readToonStoredPersonFile(inputFile);
   },
 );
+
+export const readLegacyToonStoredPerson = Effect.fn(
+  "Ascendant.readLegacyToonStoredPerson",
+)(function* (name: PersonName) {
+  const path = yield* Path.Path;
+  return yield* readToonStoredPersonFile(
+    path.join("persons", name, "input.toon"),
+  );
+});
 
 export const readLegacyStoredPerson = Effect.fn(
   "Ascendant.readLegacyStoredPerson",
