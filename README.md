@@ -1,20 +1,41 @@
 # Ascendant Agents
 
-Ascendant Agents brings Ascendant's Jyotisha knowledge into agent experiences.
+Agent skills and small TypeScript tools for Vedic astrology calculations with [`astro-ascendant`](https://www.npmjs.com/package/astro-ascendant) and Effect.
 
-## Explore
+The repository provides one shared implementation for Claude Code, Codex, and OpenCode:
 
-- Topic-specific skills for questions about career, relationships, health,
-  finance, and daily transits.
-- A Codex plugin that packages those skills for use in conversations.
-- Hosted tools that can work with account-scoped chart records and evidence.
+- `init-person` creates a reusable `persons/<name>/` calculation record;
+- `check-transit` returns a compact D1 transit chart as TOON.
 
-## Related projects
+Setup is documented next to the skill in [`skills/ascendant/setup.md`](skills/ascendant/setup.md). It accepts Bun or Node with npm and never changes person records.
 
-- [Ascendant](https://github.com/thaletto/ascendant): the calculation library.
-- [Ascendant Docs](https://github.com/thaletto/ascendant-docs): guides to the
-  library and skills.
+## Claude Code
 
-## License
+The Claude plugin manifest is `.claude-plugin/plugin.json`, with marketplace metadata in `.claude-plugin/marketplace.json`. The Ascendant skill invokes the scripts under `skills/ascendant/scripts/`.
 
-AGPL-3.0. See [LICENSE](LICENSE).
+## Codex
+
+The Codex plugin manifest is `.codex-plugin/plugin.json`. It exposes the same Ascendant skill under `skills/ascendant/`.
+
+## OpenCode
+
+The project plugin at `.opencode/plugins/ascendant.ts` exposes two native tools:
+
+- `ascendant_init_person`
+- `ascendant_check_transit`
+
+OpenCode installs the adapter dependency from `.opencode/package.json`. The shared setup script installs calculation dependencies when needed.
+
+## Local verification
+
+```bash
+bun install --frozen-lockfile
+bun run typecheck
+```
+
+Or, with Node 22.6+:
+
+```bash
+npm install
+npm run typecheck
+```

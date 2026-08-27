@@ -1,0 +1,40 @@
+{
+  "name": "ascendant",
+  "version": "0.1.0",
+  "description": "Vedic astrology calculations and evidence-based readings backed by astro-ascendant.",
+  "author": {
+    "name": "Laxman K R",
+    "email": "krlaxman03@gmail.com",
+    "url": "https://thaletto.vercel.app"
+  },
+  "homepage": "https://ascendant-docs.vercel.app",
+  "repository": "https://github.com/thaletto/ascendant-agents",
+  "license": "AGPL-3.0-or-later",
+  "keywords": [
+    "astrology",
+    "vedic-astrology",
+    "jyotisha",
+    "transits",
+    "birth-chart"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Ascendant",
+    "shortDescription": "Vedic astrology calculations and readings",
+    "longDescription": "Initialize saved person records, calculate natal and divisional charts, and inspect compact transits using astro-ascendant evidence.",
+    "developerName": "Laxman K R",
+    "category": "Astrology",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://ascendant-docs.vercel.app",
+    "defaultPrompt": [
+      "Can you initialize my saved astrology record?",
+      "What does my natal chart show?",
+      "What are my current transits?"
+    ],
+    "brandColor": "#6D4AFF"
+  }
+}

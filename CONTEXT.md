@@ -1,109 +1,165 @@
-# Ascendant Jyotisha
+# Ascendant
 
-This context defines the language for Ascendant's sidereal Jyotisha model.
-Use these terms consistently when describing birth data, charts, timing, and
-their interpretations.
+A Vedic (Indian) astrology chart generator. Given a moment and geographic location, it computes the positions of the grahas and the resulting chart. Because positions are computed for arbitrary moments, the same machinery also produces transits.
 
-## Chart language
+## Language
 
-**Ascendant**:
-The name of the Jyotisha product and library. **Lagna** is the rising point
-that anchors the house sequence in a chart.
-_Avoid_: using “Ascendant” and “Lagna” as interchangeable chart terms.
+**Chart**:
+A snapshot of astrological positions arranged into twelve houses. A Rashi or divisional Chart identifies its Division; D1 and the divisional charts are derived from the same Placements.
+_Avoid_: Birth wheel, horoscope, kundali (unless the user specifically says these)
 
-**Birth data**:
-The date, local time, time-zone offset, and geographic location used to
-calculate a person's charts.
-_Avoid_: treating a calculated chart as birth data.
-
-**Natal chart (D1/Rashi)**:
-The foundational chart calculated from a person's birth data. It establishes
-the natal pattern to which timing and derived-chart analysis relate.
-_Avoid_: bare “chart” when the chart type matters.
-
-**Divisional chart (Varga)**:
-A chart derived from the natal chart for a specific division, such as D9. It
-is not a second birth chart and does not change the person's birth data.
-_Avoid_: treating a Varga as an independent natal chart.
-
-**Sign (Rashi)**:
-One of the twelve zodiacal regions occupied by the Lagna or a planet.
-_Avoid_: using “sign” and “house” interchangeably.
-
-**House (Bhava)**:
-One of the twelve life-area positions organized around the Lagna and a house
-system. A house is not automatically the same as the sign occupying it.
-_Avoid_: treating Bhava and Rashi as synonyms outside Whole Sign houses.
-
-## Results and timing
+**Placements**:
+The exact sidereal longitudes and motion states of the Lagna and grahas at a Located Moment. They are the common source from which the D1 and divisional charts are derived; Placements given natal meaning are natal placements.
+_Avoid_: D1 chart, raw chart, base chart
 
 **Yoga**:
-A named planetary combination evaluated against a defined rule. A detected
-Yoga is evidence for interpretation, not a guaranteed outcome.
-_Avoid_: treating a Yoga as proof that an event will occur.
+A named classical formation defined by relationships among grahas, signs, or houses in one or more Charts.
+_Avoid_: Yoga calculation, detected Yoga when presence has not been established
+
+**Yoga definition**:
+A versioned rule that states the evidence and conditions used to establish one canonical Yoga, together with its classification and a description of its traditionally attributed effect.
+_Avoid_: Yoga method, Yoga function, registry entry
+
+**Yoga classification**:
+The Positive, Negative, or Neutral interpretive category assigned to a Yoga definition by its rule set.
+_Avoid_: Strength, probability, evaluation outcome
+
+**Yoga evaluation**:
+The application of one or more Yoga definitions to the relevant Chart evidence.
+_Avoid_: Yoga, Yoga detection
+
+**Yoga result**:
+The present or absent outcome of evaluating one Yoga definition, together with structured supporting evidence.
+_Avoid_: Yoga definition, prediction, guaranteed outcome
+
+**Yoga evidence**:
+The chart observations and condition outcomes that explain the cause of a present or absent Yoga result. It belongs to one evaluation and is distinct from the Yoga definition's description of the attributed effect.
+_Avoid_: Description, interpretation, strength
+
+**Yoga evidence body**:
+A Lagna or graha used as a reference or checked position in typed Yoga evidence. “Body” is limited to this evidence algebra, where one position relationship must support both Lagna and grahas.
+_Avoid_: Planet when Lagna is included, node for Rahu or Ketu
+
+**Yoga rule set**:
+A named and versioned collection of Yoga definitions whose shared identity is recorded as provenance on its Yoga results.
+_Avoid_: Yoga registry, unversioned Yoga catalogue
 
 **Ashtakavarga**:
-A point-based strength assessment derived from prescribed planetary and Lagna
-contributions. Its values are supporting evidence, not an outcome score.
-_Avoid_: presenting an Ashtakavarga value as a probability or prediction.
+A classical Parashari scoring system derived from the Rashi positions of the Sun, Moon, Mars, Mercury, Jupiter, Venus, Saturn, and Lagna in Placements. It produces Bhinnashtakavarga tables, Sarvashtakavarga, reduced Bhinnashtakavarga, and Shodhya Pinda.
+_Avoid_: Compatibility score, probability, prediction
 
-**Vimshottari Dasha**:
-A planetary timing framework used to describe when natal factors may become
-active. It can activate a natal pattern but cannot create one absent from the
-natal chart.
-_Avoid_: using “Dasha” without naming the timing system when alternatives are
-under discussion.
-
-**Reading**:
-An uncertainty-aware interpretation of a person's chart evidence and practical
-context. A reading is not proof of another person's feelings, consent,
-diagnosis, or a guaranteed outcome.
-_Avoid_: presenting an interpretation as certainty.
-
-## Jaimini language
-
-**Jaimini core**:
-The selected seven-role Jaimini analysis consisting of Chara Karakas, Rashi
-Drishti, Karakamsha, Arudha Padas, Upapada, and Argala.
-_Avoid_: treating the Jaimini core as a replacement for the natal chart.
+**Jaimini**:
+A school of Jyotisha containing distinct calculations such as Chara Karakas, Rashi Drishti, Karakamsha, Arudha Padas, Upapada, and Argala. It identifies a method's provenance, not a calculation requested as a whole.
+_Avoid_: Jaimini calculation, Jaimini mode, Jaimini core as a user request
 
 **Chara Karakas**:
-Seven planetary roles assigned from their degrees within a sign. Atmakaraka is
-the self and core-direction role; Darakaraka is the partnership role.
-_Avoid_: treating a Karaka as a literal event or another person's private state.
+Seven planetary roles assigned in descending order from the Degrees derived exactly from the classical planets' stored D1 longitudes. Planets at the same position within their Signs jointly hold every role occupied by their tied ranks.
+_Avoid_: requesting Jaimini, approximate tie, arbitrary tiebreaker, Rahu tie fallback
 
 **Rashi Drishti**:
-Jaimini's sign-to-sign influence.
-_Avoid_: importing Parashari planetary aspects or degree orbs.
+The signs influenced by one reference Sign under a Jaimini sign-aspect method.
+_Avoid_: Planetary aspect, degree orb, all-sign table as the required result
 
 **Karakamsha**:
-The D9 sign occupied by the Atmakaraka.
-_Avoid_: treating Karakamsha as another natal chart.
+The D9 Sign occupied by each planet holding the Atmakaraka role. When tied planets jointly hold Atmakaraka, every corresponding D9 Sign is a Karakamsha result; the supporting Chara Karakas are not returned unless separately requested.
+_Avoid_: Another natal chart, implicit Chara Karaka result
 
 **Arudha Pada**:
-The projected or visible expression of a house. **Upapada** is the twelfth-house
-Pada used for partnership themes.
-_Avoid_: reading a Pada as literal status, ownership, or another person's intent.
+The projected Sign reached by repeating the distance from one D1 house's Sign to its lord. This plain projection does not include exceptional source-Sign or seventh-Sign adjustments.
+_Avoid_: All-house table as the required result, literal status or ownership
+
+**Upapada**:
+The Arudha Pada of the twelfth D1 house, available as its own requested calculation.
+_Avoid_: Generic Arudha request, another person's intent
 
 **Argala**:
-Support and obstruction around a selected sign or Pada, represented by its
-contributors and blockers.
-_Avoid_: turning contributor counts into a deterministic result.
+The supporting and obstructing relationships around one explicit reference under an Argala method. A Sign reference uses the ordinary direction, while a Ketu reference uses the reverse direction from Ketu's occupied Sign.
+_Avoid_: All-sign table as the required result, deterministic score or prediction
 
-**Parashari–Jaimini comparison**:
-An analysis in which each system is evaluated by its own rules before the
-results are compared. Agreement strengthens confidence; equally ranked
-disagreement remains mixed.
-_Avoid_: silently borrowing one system's aspects, significators, or counting
-rules for the other.
+**Bindu**:
+A benefic contribution assigned to one Rashi for an assessed Ashtakavarga entity by one contributor. An Ashtakavarga sign score is the number of bindus assigned to that Rashi.
+_Avoid_: Degree, longitude, weighted point
 
-## Saved people
+**Bhinnashtakavarga / BAV**:
+The twelve Rashi scores for one assessed entity, formed from the bindus contributed by the seven classical planets and Lagna. There is one BAV table for each of those eight entities.
+_Avoid_: SAV, planetary placement, house score
 
-**Person**:
-The human subject whose birth data is being examined.
-_Avoid_: using “person” to mean a saved record or calculation bundle.
+**Sarvashtakavarga / SAV**:
+The twelve Rashi scores formed by adding the seven planetary BAV tables. The Lagna BAV is excluded; under the classical Parashari table the twelve SAV scores total 337.
+_Avoid_: Lagna-inclusive total, compatibility score, universal strength
 
-**Person record**:
-A reusable representation of one person's birth data and the charts, timing,
-combinations, and supporting results derived from it.
-_Avoid_: “profile” when referring to this calculation record.
+**Reduced Bhinnashtakavarga**:
+The seven planetary BAV tables after Trikona reduction followed by Ekadhipatya reduction. It is the basis for Shodhya Pinda and is distinct from raw BAV and SAV.
+_Avoid_: Reduced SAV, normalized score
+
+**Shodhya Pinda**:
+The weighted total for one classical planet derived from its reduced BAV. It is the sum of Rashi Pinda, which weights signs, and Graha Pinda, which weights the signs occupied by the seven classical planets.
+_Avoid_: SAV total, probability, standalone prediction
+
+**Division**:
+The identity of a chart within the divisional system, written D1, D2, D3, and so on. D1 identifies the Rashi chart; the other supported values identify divisional charts.
+_Avoid_: Chart type, Varga number
+
+**D1 / Rashi chart**:
+The sign-based D1 chart derived from Placements. Its twelve houses are counted from the Lagna sign; it is distinct from a Bhava chart.
+_Avoid_: Base chart, raw chart
+
+**Divisional chart**:
+A sign-based chart derived from Placements by applying the mapping for its Division to the Lagna and grahas. Its twelve houses are counted from the resulting Lagna sign.
+_Avoid_: Derived D1, harmonic chart
+
+**Degree**:
+A placement's position within its sign, from zero up to but not including thirty degrees. In D1 it is the source degree within the Rashi; in a divisional chart it is the degree produced by the divisional mapping.
+_Avoid_: Absolute longitude, source longitude
+
+**Bhava chart**:
+A twelve-house cusp representation produced using a configured House system. It assigns each placement to the house whose cusp begins the placement's half-open zodiac interval, exposes the calculation's eight house angles, and is separate from the D1 / Rashi chart and divisional charts.
+_Avoid_: D1, Rashi chart
+
+**Bhava house**:
+One of the twelve cusp-bounded sections of a Bhava chart. It owns the cusp at its beginning and the placements from that cusp up to, but not including, the next cusp.
+_Avoid_: Sign, Rashi, Whole Sign house
+
+**Chart calculation**:
+The Placements, D1, requested divisional charts, and configured Bhava chart derived together under the same AstroParams. A Chart calculation always contains D1 and records its AstroParams; one given natal meaning is a natal calculation.
+_Avoid_: Chart bundle, chart pack
+
+**Moment**:
+The point in time at which planetary positions are computed. It may represent a birth, a transit, or another event. A Moment is separate from configuration: it is per-computation input, not a setting.
+_Avoid_: Time, timestamp, epoch (unless you mean something else)
+
+**Located Moment**:
+A Moment paired with the latitude and longitude at which Placements are calculated. It is the canonical input for any Chart calculation and may be given natal, transit, or other event meaning.
+_Avoid_: Birth, birth data, chart input, event data
+
+**AstroParams**:
+The parameters of the astrological computation: ayanamsa and house system. Separate from the Moment and location; the house system applies to a Bhava chart, not to D1 or divisional charts.
+_Avoid_: AstroConfig, settings, options, chart config
+
+**Planet**:
+A graha's mapped placement in a Chart: its longitude, Degree, sign, dignity, and inherited retrograde state. Its longitude and Degree belong to that Chart's Division; the source nakshatra and pada remain on the Placements from which the Chart was derived.
+_Avoid_: Body, celestial body, position
+
+**Nakshatra placement**:
+The nakshatra and pada determined by a graha's source sidereal longitude. It belongs to Placements and is not recalculated from a divisional Chart's mapped longitude.
+_Avoid_: Divisional nakshatra, Sign nakshatra
+
+**Sign**:
+One of the twelve zodiac signs a graha can occupy: its name and lord. A sign spans several nakshatras, so it does not carry a nakshatra itself.
+_Avoid_: Rashi, zodiac, star sign
+
+**Relationship direction**:
+All chart relationships are one-directional to keep the data small. A House lists its planets; a Planet does not carry a house reference. Connection back from planet to house is derived by scanning the chart.
+_Avoid_: Two-way connections, back-references, cycles
+
+**Ayanamsa**:
+The sidereal reference frame used to align tropical longitudes to the fixed zodiac. It is selected from the supported predefined methodologies in AstroParams and recorded on each Chart calculation.
+_Avoid_: Reference frame, zodiac offset
+
+**House system**:
+The method selected in AstroParams for dividing a Bhava chart into twelve houses. It is recorded on each Chart calculation and does not change the sign-based houses of D1 or divisional charts.
+_Avoid_: House division, cusps method
+
+**Rahu / Ketu**:
+The lunar nodes, grahas that behave like planets in every way except sign ownership: they do not rule a sign.
+_Avoid_: Node, shadow planet, Draco

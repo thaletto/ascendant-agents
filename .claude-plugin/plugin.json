@@ -1,0 +1,26 @@
+{
+    "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+    "name": "ascendant",
+    "description": "Laxman's agent skills for Astrological analysis of Birth Chart, Transits, Vimshottari Dasha, Ashtavarga Scores etc...",
+    "version": "0.1.0",
+    "author": {
+        "name": "Laxman K R",
+        "email": "krlaxman03@gmail.com",
+        "url": "https://thaletto.vercel.app"
+    },
+    "homepage": "https://ascendant-docs.vercel.app",
+    "repository": "https://github.com/thaletto/ascendant-agents",
+    "license": "AGPL-3.0-or-later",
+    "keywords": [
+        "astrology",
+        "vedic astrology",
+        "career advice",
+        "life advice",
+        "sidereal",
+        "prediction",
+        "birth chart"
+    ],
+    "skills": [
+        "./skills/ascendant"
+    ]
+}
