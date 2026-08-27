@@ -1,0 +1,12 @@
+{
+  "name": "ascendant-opencode-plugin",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@opencode-ai/plugin": "1.18.23"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0"
+  }
+}
