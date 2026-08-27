@@ -1,0 +1,23 @@
+{
+  "name": "ascendant-agents",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "init-person": "bun skills/ascendant/tools/init-person.ts",
+    "check-transit": "bun skills/ascendant/tools/check-transit.ts",
+    "typecheck": "tsc --project skills/ascendant/tsconfig.json --noEmit && tsc --project .opencode/tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@effect/platform-bun": "^4.0.0-rc.112",
+    "astro-ascendant": "^0.1.2",
+    "effect": "^4.0.0-rc.112"
+  },
+  "devDependencies": {
+    "typescript": "7.0.2"
+  },
+  "trustedDependencies": [
+    "@swisseph/node",
+    "msgpackr-extract"
+  ]
+}
