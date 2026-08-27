@@ -1,0 +1,25 @@
+{
+    "name": "ascendant",
+    "owner": {
+        "name": "Laxman K R",
+        "url": "https://thaletto.vercel.app"
+    },
+    "description": "Laxman's skills for Astrological analysis and insights, as an installable Claude Code plugin.",
+    "plugins": [
+        {
+            "name": "ascendant",
+            "source": "./",
+            "description": "Laxman's agent skills for Astrological analysis of Birth Chart, Transits, Vimshottari Dasha, Ashtavarga Scores etc...",
+            "category": "astrology",
+            "keywords": [
+                "astrology",
+                "vedic astrology",
+                "career advice",
+                "life advice",
+                "sidereal",
+                "prediction",
+                "birth chart"
+            ]
+        }
+    ]
+}

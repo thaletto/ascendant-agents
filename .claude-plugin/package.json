@@ -1,0 +1,23 @@
+{
+  "name": "ascendant-agents",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "chart": "bun skills/ascendant/tools/chart.ts",
+    "typecheck": "tsc --project skills/ascendant/tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@effect/platform-bun": "^4.0.0-rc.112",
+    "@effect/platform-node": "^4.0.0-rc.112",
+    "astro-ascendant": "^0.1.2",
+    "effect": "^4.0.0-rc.112"
+  },
+  "devDependencies": {
+    "typescript": "7.0.2"
+  },
+  "trustedDependencies": [
+    "@swisseph/node",
+    "msgpackr-extract"
+  ]
+}
