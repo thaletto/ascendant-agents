@@ -7,6 +7,7 @@
     "ascendant": "node --experimental-strip-types skills/ascendant/tools/ascendant.ts",
     "init-person": "node --experimental-strip-types skills/ascendant/tools/ascendant.ts init-person",
     "check-transit": "node --experimental-strip-types skills/ascendant/tools/ascendant.ts transit",
+    "test": "bun test",
     "typecheck": "tsc --project skills/ascendant/tsconfig.json --noEmit && tsc --project .opencode/tsconfig.json --noEmit"
   },
   "dependencies": {

@@ -1,30 +1,51 @@
 # Ascendant Agents
 
-Agent skills and small TypeScript tools for Vedic astrology calculations with [`astro-ascendant`](https://www.npmjs.com/package/astro-ascendant) and Effect.
+Agent skills and tools for Vedic astrology calculations with [`astro-ascendant`](https://www.npmjs.com/package/astro-ascendant) and Effect.
 
-The repository provides one shared implementation for Claude Code, Codex, and OpenCode:
+Install the same Ascendant skill as a Claude Code plugin, a standalone skill, or a Codex plugin. It provides two operations:
 
 - `init-person` creates a reusable `persons/<name>/` calculation record;
 - `check-transit` returns a compact D1 transit chart as TOON.
 
 Setup is documented next to the skill in [`skills/ascendant/setup.md`](skills/ascendant/setup.md). It accepts Bun or Node with npm, installs calculation dependencies in the active agent project without saving them to an existing package manifest or writing a lockfile, and never changes person records.
 
-## Claude Code
+Optionally, mount `persons` with SMFS:
 
-The Claude plugin manifest is `.claude-plugin/plugin.json`, with marketplace metadata in `.claude-plugin/marketplace.json`. The Ascendant skill invokes the scripts under `skills/ascendant/scripts/`.
+```console
+$ curl -fsSL smfs.ai/install | sh
+$ smfs mount persons
+```
 
-## Codex
+## Install the Claude Code plugin
 
-The Codex plugin manifest is `.codex-plugin/plugin.json`. It exposes the same Ascendant skill under `skills/ascendant/`.
+Run these commands inside Claude Code:
 
-## OpenCode
+```text
+/plugin marketplace add thaletto/ascendant-agents
+/plugin install ascendant@ascendant
+/reload-plugins
+```
 
-The project plugin at `.opencode/plugins/ascendant.ts` exposes two native tools:
+## Install the standalone skill
 
-- `ascendant_init_person`
-- `ascendant_check_transit`
+From the project where you want to use Ascendant, run:
 
-OpenCode installs the adapter dependency from `.opencode/package.json`. The shared setup script installs calculation dependencies in the active agent project when needed.
+```console
+$ npx skills add thaletto/ascendant-agents --skill ascendant
+```
+
+Choose the agent or agents that should receive the skill when prompted.
+
+## Install the Codex plugin
+
+Run:
+
+```console
+$ codex plugin marketplace add thaletto/ascendant-agents --ref main
+$ codex plugin add ascendant@ascendant
+```
+
+Start a new Codex task after installation so the skill is loaded.
 
 ## Local verification
 

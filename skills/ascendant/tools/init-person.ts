@@ -40,6 +40,18 @@ export interface PersonInitialization {
   };
 }
 
+function formatMemory(storedPerson: StoredPerson): string {
+  return [
+    "---",
+    `name: ${storedPerson.name}`,
+    `birth: ${storedPerson.moment}`,
+    `latitude: ${storedPerson.latitude}`,
+    `longitude: ${storedPerson.longitude}`,
+    "---",
+    "",
+  ].join("\n");
+}
+
 function formatDasha(
   dashas: Effect.Success<ReturnType<typeof Dasha.calculate>>,
 ) {
@@ -135,9 +147,13 @@ export const initializePerson = Effect.fn("Ascendant.initializePerson")(
 
     const chartsDirectory = path.join(personDirectory, "charts");
     const jaiminiDirectory = path.join(personDirectory, "jaimini");
+    const memoryFile = path.join(personDirectory, "MEMORY.md");
     const presentYogas = yoga.results.filter((result) => result.present);
     yield* fs.makeDirectory(chartsDirectory, { recursive: true });
     yield* fs.makeDirectory(jaiminiDirectory, { recursive: true });
+    if (!(yield* fs.exists(memoryFile))) {
+      yield* fs.writeFileString(memoryFile, formatMemory(storedPerson));
+    }
 
     yield* Effect.all(
       calculation.charts.map((chart) =>

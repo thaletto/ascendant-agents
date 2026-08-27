@@ -24,4 +24,13 @@ Use this guide when `persons/<name>/` is absent or an Ascendant command reports 
      --longitude 77.5946
    ```
 
-   Completion: stdout reports the saved record. The record contains normalized input, `charts/`, `dasha.json`, `sav.json`, present Yoga results, and `jaimini/` artifacts. Identical input refreshes the record; different birth data for the same name requires a new name.
+   Completion: stdout reports the saved record. The record contains normalized input, `MEMORY.md`, `charts/`, `dasha.json`, `sav.json`, present Yoga results, and `jaimini/` artifacts. `MEMORY.md` starts with the person's birth details and is never overwritten during a refresh. Identical input refreshes the record; different birth data for the same name requires a new name.
+
+4. After initialization succeeds, inform the user that they can optionally mount the Supermemory filesystem at `persons` for improved memory retrieval performance:
+
+   ```bash
+   curl -fsSL smfs.ai/install | sh
+   smfs mount persons
+   ```
+
+   Present the commands as an opt-in suggestion. Run them only when the user asks you to install and mount SMFS.
