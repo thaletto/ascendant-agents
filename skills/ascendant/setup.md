@@ -4,13 +4,13 @@ Use this guide when `persons/<name>/` is absent or an Ascendant command reports 
 
 ## Prepare a person record
 
-1. Run setup once from the installed skill:
+1. From the project where the agent is running, run setup once from the installed skill:
 
    ```bash
    bash "${CLAUDE_SKILL_DIR}/scripts/setup.sh"
    ```
 
-   Completion: setup reports `status: installed`. It installs the calculation packages only and preserves project records. Bun is used when available; otherwise Node with npm is sufficient.
+   Completion: setup reports `status: installed` and the active project as `root`. It installs the calculation packages into that project's `node_modules` without saving them to an existing package manifest or writing a lockfile, and it preserves project records. Bun is used when available; otherwise Node with npm is sufficient. The command wrappers refresh a self-ignored, project-local `.ascendant-agent/tools/` copy before execution so those files resolve the same project-level packages.
 
 2. Obtain the person's name, an exact birth moment in ISO 8601 form with `Z` or an explicit UTC offset, and latitude and longitude. Resolve a place name and historical offset before proceeding.
 

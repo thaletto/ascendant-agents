@@ -1,35 +1,66 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SKILL_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
-PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(cd "${SKILL_DIR}/../.." && pwd)}"
+PROJECT_DIR="${CLAUDE_PROJECT_DIR:-${PWD}}"
 
-cd "${PLUGIN_ROOT}"
+required_packages=(
+  "@effect/platform-node-shared"
+  "@swisseph/node"
+  "@toon-format/toon"
+  "astro-ascendant"
+  "axi-sdk-js"
+  "effect"
+)
+
+package_specs=(
+  "@effect/platform-node-shared@4.0.0-rc.112"
+  "@swisseph/node@1.3.1"
+  "@toon-format/toon@4.1.1"
+  "astro-ascendant@0.1.2"
+  "axi-sdk-js@0.1.11"
+  "effect@4.0.0-rc.112"
+)
+
+cd "${PROJECT_DIR}"
 if command -v bun >/dev/null 2>&1; then
-  install_command=(bun install --frozen-lockfile)
+  install_dependencies() {
+    bun add --no-save --trust "${package_specs[@]}"
+  }
 elif command -v npm >/dev/null 2>&1; then
-  install_command=(npm install --no-audit --no-fund)
+  install_dependencies() {
+    local npm_major
+
+    if ! npm install \
+      --no-save \
+      --no-package-lock \
+      --no-audit \
+      --no-fund \
+      "${package_specs[@]}"; then
+      return 1
+    fi
+
+    npm_major="$(npm --version)"
+    npm_major="${npm_major%%.*}"
+    if [[ "${npm_major}" =~ ^[0-9]+$ ]] && [ "${npm_major}" -ge 11 ]; then
+      npm rebuild \
+        @swisseph/node \
+        msgpackr-extract \
+        --dangerously-allow-all-scripts
+    fi
+  }
 else
   printf 'error: Node or Bun package manager is required\ncode: RUNTIME_MISSING\nhelp: Install Node 22.6+ (npm) or Bun, then retry'
   exit 1
 fi
 
-if "${install_command[@]}" >&2; then
-  required_packages=(
-    "@effect/platform-node-shared"
-    "@toon-format/toon"
-    "astro-ascendant"
-    "axi-sdk-js"
-    "effect"
-  )
+if install_dependencies >&2; then
   for package in "${required_packages[@]}"; do
-    if [ ! -f "${PLUGIN_ROOT}/node_modules/${package}/package.json" ]; then
+    if [ ! -f "${PROJECT_DIR}/node_modules/${package}/package.json" ]; then
       printf 'error: Ascendant dependencies were not installed\ncode: SETUP_FAILED\nhelp: Run setup again after checking the package manager output'
       exit 1
     fi
   done
-  printf 'setup:\n  status: installed\n  root: %s' "${PLUGIN_ROOT}"
+  printf 'setup:\n  status: installed\n  root: %s\n' "${PROJECT_DIR}"
 else
   printf 'error: Dependency installation failed\ncode: SETUP_FAILED\nhelp: Run setup again after checking the package manager output'
   exit 1

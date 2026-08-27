@@ -13,8 +13,6 @@ import {
   Schema,
 } from "effect";
 
-export const TOOL_VERSION = "0.1.0";
-
 export const PersonName = Schema.String.pipe(
   Schema.check(
     Schema.isPattern(/^[\p{L}\p{N}][\p{L}\p{N} .'-]{0,79}$/u, {

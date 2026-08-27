@@ -3,8 +3,9 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SKILL_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
-PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(cd "${SKILL_DIR}/../.." && pwd)}"
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-${PWD}}"
+RUNTIME_DIR="${PROJECT_DIR}/.ascendant-agent"
+RUNTIME_TOOLS_DIR="${RUNTIME_DIR}/tools"
 
 print_error() {
   printf 'error: %s\ncode: %s\nhelp: %s' "$1" "$2" "$3"
@@ -29,15 +30,21 @@ else
   exit 1
 fi
 
-if [ ! -f "${PLUGIN_ROOT}/node_modules/astro-ascendant/package.json" ] || \
-  [ ! -f "${PLUGIN_ROOT}/node_modules/axi-sdk-js/package.json" ] || \
-  [ ! -f "${PLUGIN_ROOT}/node_modules/effect/package.json" ]; then
+if [ ! -f "${PROJECT_DIR}/node_modules/astro-ascendant/package.json" ] || \
+  [ ! -f "${PROJECT_DIR}/node_modules/axi-sdk-js/package.json" ] || \
+  [ ! -f "${PROJECT_DIR}/node_modules/effect/package.json" ]; then
   print_error \
     "Ascendant dependencies are missing" \
     "RUNTIME_MISSING" \
-    "Run bash \"${SKILL_DIR}/scripts/setup.sh\", then retry"
+    "Run bash \"${SKILL_DIR}/scripts/setup.sh\" from ${PROJECT_DIR}, then retry"
   exit 1
 fi
 
+mkdir -p "${RUNTIME_TOOLS_DIR}"
+if [ ! -e "${RUNTIME_DIR}/.gitignore" ]; then
+  printf '*\n' > "${RUNTIME_DIR}/.gitignore"
+fi
+cp "${SKILL_DIR}"/tools/*.ts "${SKILL_DIR}/tools/package.json" "${RUNTIME_TOOLS_DIR}/"
+
 cd "${PROJECT_DIR}"
-exec "${RUNTIME[@]}" "${SKILL_DIR}/tools/ascendant.ts" "$@"
+exec "${RUNTIME[@]}" "${RUNTIME_TOOLS_DIR}/ascendant.ts" "$@"

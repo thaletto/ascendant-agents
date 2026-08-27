@@ -7,7 +7,7 @@ The repository provides one shared implementation for Claude Code, Codex, and Op
 - `init-person` creates a reusable `persons/<name>/` calculation record;
 - `check-transit` returns a compact D1 transit chart as TOON.
 
-Setup is documented next to the skill in [`skills/ascendant/setup.md`](skills/ascendant/setup.md). It accepts Bun or Node with npm and never changes person records.
+Setup is documented next to the skill in [`skills/ascendant/setup.md`](skills/ascendant/setup.md). It accepts Bun or Node with npm, installs calculation dependencies in the active agent project without saving them to an existing package manifest or writing a lockfile, and never changes person records.
 
 ## Claude Code
 
@@ -24,7 +24,7 @@ The project plugin at `.opencode/plugins/ascendant.ts` exposes two native tools:
 - `ascendant_init_person`
 - `ascendant_check_transit`
 
-OpenCode installs the adapter dependency from `.opencode/package.json`. The shared setup script installs calculation dependencies when needed.
+OpenCode installs the adapter dependency from `.opencode/package.json`. The shared setup script installs calculation dependencies in the active agent project when needed.
 
 ## Local verification
 

@@ -7,6 +7,8 @@ description: Answer Vedic astrology readings and timing questions from a saved p
 
 Use computed artifacts as evidence. Give the conclusion first; separate calculation facts from interpretation; express timing as a supported window, never a guarantee. Known facts, consent, availability, safety, and professional medical, legal, and financial evidence outrank astrological interpretation.
 
+Reframe fixed questions: preserve the underlying concern, then answer through chart-supported qualities, patterns, choices, or preparation, with tendencies and confidence limits.
+
 Person records live in the project at `persons/<name>/`.
 
 ## Reading flow
