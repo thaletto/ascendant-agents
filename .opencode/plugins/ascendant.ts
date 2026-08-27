@@ -27,22 +27,9 @@ async function runScript(
 export const AscendantPlugin: Plugin = async function AscendantPlugin({ $ }) {
   return {
     tool: {
-      ascendant_setup: tool({
-        description:
-          "Install the Ascendant plugin's Bun dependencies. This does not create or modify person records.",
-        args: {},
-        async execute(_args, context) {
-          return await runScript(
-            $,
-            scriptPath("setup"),
-            [],
-            context.directory,
-          );
-        },
-      }),
       ascendant_init_person: tool({
         description:
-          "Initialize a saved persons/<name> record with all supported charts, Dasha, SAV, present Yogas, and named Jaimini artifacts.",
+          "Create or refresh one saved astrology record from exact birth data.",
         args: {
           name: tool.schema
             .string()
@@ -85,7 +72,7 @@ export const AscendantPlugin: Plugin = async function AscendantPlugin({ $ }) {
       }),
       ascendant_check_transit: tool({
         description:
-          "Calculate a token-efficient D1 transit chart for an initialized person at a supplied moment.",
+          "Calculate a compact D1 transit for one saved person and moment.",
         args: {
           name: tool.schema
             .string()

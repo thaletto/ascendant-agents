@@ -1,51 +1,46 @@
-import { BunRuntime } from "@effect/platform-bun";
 import { Chart } from "astro-ascendant";
-import { Console, DateTime, Effect, Match } from "effect";
-import { Command, Flag } from "effect/unstable/cli";
+import { DateTime, Effect, Match } from "effect";
 
 import {
-  AppLayer,
   decodeMoment,
   makeLocatedMoment,
-  OffsetMoment,
-  PersonName,
+  type OffsetMoment,
+  type PersonName,
   readStoredPerson,
-  TOOL_VERSION,
-} from "./common.js";
+} from "./common.ts";
 
-const nameFlag = Flag.string("name").pipe(
-  Flag.withDescription("Name of an initialized persons/<name> record"),
-  Flag.withSchema(PersonName),
-);
-
-const momentFlag = Flag.string("moment").pipe(
-  Flag.withDescription("Offset-aware ISO 8601 transit moment"),
-  Flag.withSchema(OffsetMoment),
-);
-
-function formatDegree(degree: number): string {
-  return degree.toFixed(2);
+export interface TransitGraha {
+  readonly name: string;
+  readonly sign: string;
+  readonly degree: number;
+  readonly house: number;
+  readonly retrograde: boolean;
 }
 
-function compactChart(at: DateTime.Utc, chart: Chart.Chart) {
+export interface TransitOutput {
+  readonly at: string;
+  readonly lagna: string;
+  readonly grahas: ReadonlyArray<TransitGraha>;
+}
+
+function compactChart(at: DateTime.Utc, chart: Chart.Chart): TransitOutput {
   const firstHouse = chart.houses[1];
   const lagna = Match.value(firstHouse.lagna).pipe(
-    Match.when(
-      Match.null,
-      () => firstHouse.sign,
-    ),
+    Match.when(Match.null, () => firstHouse.sign),
     Match.when(
       Match.defined,
-      (placement) =>
-        `${placement.sign.name} ${formatDegree(placement.degree)}`,
+      (placement) => `${placement.sign.name} ${placement.degree.toFixed(2)}`,
     ),
     Match.exhaustive,
   );
   const grahas = Chart.Houses.literals.flatMap((house) =>
-    chart.houses[house].planets.map(
-      (planet) =>
-        `${planet.name}:${planet.sign.name} ${formatDegree(planet.degree)} H${house}${planet.is_retrograde ? " R" : ""}`,
-    ),
+    chart.houses[house].planets.map((planet) => ({
+      name: planet.name,
+      sign: planet.sign.name,
+      degree: Number(planet.degree.toFixed(2)),
+      house,
+      retrograde: planet.is_retrograde,
+    })),
   );
 
   return {
@@ -55,13 +50,8 @@ function compactChart(at: DateTime.Utc, chart: Chart.Chart) {
   };
 }
 
-const command = Command.make(
-  "check-transit",
-  {
-    name: nameFlag,
-    moment: momentFlag,
-  },
-  Effect.fn("Ascendant.checkTransitCommand")(function* ({ moment, name }) {
+export const calculateTransit = Effect.fn("Ascendant.calculateTransit")(
+  function* (name: PersonName, moment: OffsetMoment) {
     const person = yield* readStoredPerson(name);
     const transitDate = yield* decodeMoment(moment);
     const locatedMoment = makeLocatedMoment(
@@ -70,18 +60,7 @@ const command = Command.make(
       person.longitude,
     );
     const calculation = yield* Chart.generate(locatedMoment, [1]);
-    const output = compactChart(transitDate, calculation.charts[0]);
 
-    yield* Console.log(JSON.stringify(output));
-  }),
-).pipe(
-  Command.withDescription(
-    "Calculate a compact D1 transit chart at a saved person's location",
-  ),
-);
-
-command.pipe(
-  Command.run({ version: TOOL_VERSION }),
-  Effect.provide(AppLayer),
-  BunRuntime.runMain,
+    return compactChart(transitDate, calculation.charts[0]);
+  },
 );

@@ -1,4 +1,7 @@
-import { BunServices } from "@effect/platform-bun";
+import {
+  NodeFileSystem,
+  NodePath,
+} from "@effect/platform-node-shared";
 import { AstroParams, Chart } from "astro-ascendant";
 import * as Swisseph from "astro-ascendant/swisseph";
 import {
@@ -81,8 +84,14 @@ export class JsonEncodingError extends Schema.TaggedError<JsonEncodingError>()(
   },
 ) {}
 
+const NodeServicesLayer: Layer.Layer<FileSystem.FileSystem | Path.Path> =
+  Layer.mergeAll(NodeFileSystem.layer, NodePath.layer);
+
+export const PlatformLayer: Layer.Layer<FileSystem.FileSystem | Path.Path> =
+  NodeServicesLayer;
+
 export const AppLayer = Layer.mergeAll(
-  BunServices.layer,
+  PlatformLayer,
   AstroParams.DefaultAstroParams,
   Swisseph.SwissephLayer,
 );

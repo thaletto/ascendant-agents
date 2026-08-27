@@ -1,0 +1,4 @@
+interface:
+  display_name: "Ascendant"
+  short_description: "Calculate Vedic astrology charts and transits"
+  default_prompt: "Use $ascendant to initialize my saved astrology record or calculate a transit from verified birth data."

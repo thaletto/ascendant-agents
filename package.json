@@ -4,17 +4,23 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "init-person": "bun skills/ascendant/tools/init-person.ts",
-    "check-transit": "bun skills/ascendant/tools/check-transit.ts",
+    "ascendant": "node --experimental-strip-types skills/ascendant/tools/ascendant.ts",
+    "init-person": "node --experimental-strip-types skills/ascendant/tools/ascendant.ts init-person",
+    "check-transit": "node --experimental-strip-types skills/ascendant/tools/ascendant.ts transit",
     "typecheck": "tsc --project skills/ascendant/tsconfig.json --noEmit && tsc --project .opencode/tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@effect/platform-bun": "^4.0.0-rc.112",
+    "@effect/platform-node-shared": "^4.0.0-rc.112",
+    "@toon-format/toon": "4.1.1",
     "astro-ascendant": "^0.1.2",
+    "axi-sdk-js": "0.1.11",
     "effect": "^4.0.0-rc.112"
   },
   "devDependencies": {
     "typescript": "7.0.2"
+  },
+  "overrides": {
+    "@toon-format/toon": "4.1.1"
   },
   "trustedDependencies": [
     "@swisseph/node",
