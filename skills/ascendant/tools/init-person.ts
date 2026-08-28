@@ -10,7 +10,7 @@ import {
   Upapada,
   Yoga,
 } from "astro-ascendant";
-import { DateTime, Effect, FileSystem, Path } from "effect";
+import { DateTime, Effect, FileSystem, Path, Schema } from "effect";
 
 import {
   decodeMoment,
@@ -199,7 +199,7 @@ export const initializePerson = Effect.fn("Ascendant.initializePerson")(
       calculation.charts.map((chart) =>
         writeToon(
           path.join(chartsDirectory, `D${chart.division}.txt`),
-          chart,
+          Schema.encodeSync(Chart.Chart)(chart),
         ),
       ),
       { concurrency: "unbounded" },

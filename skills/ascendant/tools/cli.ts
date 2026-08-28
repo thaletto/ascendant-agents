@@ -215,7 +215,7 @@ const initPersonWorkflow = Effect.fn("Ascendant.initPersonWorkflow")(
         domainError(error, input.name, {
           code: "INIT_PERSON_FAILED",
           message: "Unable to initialize the person record",
-          help: "Verify the birth data and project directory, then retry",
+          help: "Verify the birth data and current working directory, then retry",
         }),
       ),
     );

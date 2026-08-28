@@ -9,7 +9,10 @@ Use computed artifacts as evidence. Give the conclusion first; separate calculat
 
 Reframe fixed questions: preserve the underlying concern, then answer through chart-supported qualities, patterns, choices, or preparation, with tendencies and confidence limits.
 
-Person records live in the project at `persons/<name>/`.
+Person records live in the current working directory at `persons/<name>/`.
+
+`<ascendant-skill-dir>` in [setup.md](setup.md) is this installed skill's
+directory. Resolve it from this file before running a script.
 
 ## Person memory
 

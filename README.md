@@ -7,14 +7,7 @@ Install the same Ascendant skill as a Claude Code plugin, a standalone skill, or
 - `init-person` creates a reusable `persons/<name>/` calculation record;
 - `check-transit` returns a compact D1 transit chart as TOON.
 
-Setup is documented next to the skill in [`skills/ascendant/setup.md`](skills/ascendant/setup.md). It accepts Bun or Node with npm, installs calculation dependencies in the active agent project without saving them to an existing package manifest or writing a lockfile, and never changes person records.
-
-Optionally, mount `persons` with SMFS:
-
-```console
-$ curl -fsSL smfs.ai/install | sh
-$ smfs mount persons
-```
+Setup is documented next to the skill in [`skills/ascendant/setup.md`](skills/ascendant/setup.md). It accepts Bun or Node with npm, installs calculation dependencies in the agent's current working directory without saving them to an existing package manifest or writing a lockfile, and never changes person records.
 
 ## Install the Claude Code plugin
 
@@ -28,7 +21,7 @@ Run these commands inside Claude Code:
 
 ## Install the standalone skill
 
-From the project where you want to use Ascendant, run:
+From the working directory where you want to use Ascendant, run:
 
 ```console
 $ npx skills add thaletto/ascendant-agents --skill ascendant

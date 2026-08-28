@@ -3,8 +3,10 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SKILL_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
-PROJECT_DIR="${CLAUDE_PROJECT_DIR:-${PWD}}"
-RUNTIME_DIR="${PROJECT_DIR}/.ascendant-agent"
+# Keep dependencies, the runtime copy, and person records in the current
+# working directory rather than beside the installed skill.
+WORKING_DIRECTORY="$(pwd -P)"
+RUNTIME_DIR="${WORKING_DIRECTORY}/.ascendant-agent"
 RUNTIME_TOOLS_DIR="${RUNTIME_DIR}/tools"
 
 print_error() {
@@ -30,13 +32,13 @@ else
   exit 1
 fi
 
-if [ ! -f "${PROJECT_DIR}/node_modules/astro-ascendant/package.json" ] || \
-  [ ! -f "${PROJECT_DIR}/node_modules/axi-sdk-js/package.json" ] || \
-  [ ! -f "${PROJECT_DIR}/node_modules/effect/package.json" ]; then
+if [ ! -f "${WORKING_DIRECTORY}/node_modules/astro-ascendant/package.json" ] || \
+  [ ! -f "${WORKING_DIRECTORY}/node_modules/axi-sdk-js/package.json" ] || \
+  [ ! -f "${WORKING_DIRECTORY}/node_modules/effect/package.json" ]; then
   print_error \
     "Ascendant dependencies are missing" \
     "RUNTIME_MISSING" \
-    "Run bash \"${SKILL_DIR}/scripts/setup.sh\" from ${PROJECT_DIR}, then retry"
+    "Run bash \"${SKILL_DIR}/scripts/setup.sh\" from ${WORKING_DIRECTORY}, then retry"
   exit 1
 fi
 
@@ -46,5 +48,5 @@ if [ ! -e "${RUNTIME_DIR}/.gitignore" ]; then
 fi
 cp "${SKILL_DIR}"/tools/*.ts "${SKILL_DIR}/tools/package.json" "${RUNTIME_TOOLS_DIR}/"
 
-cd "${PROJECT_DIR}"
+cd "${WORKING_DIRECTORY}"
 exec "${RUNTIME[@]}" "${RUNTIME_TOOLS_DIR}/ascendant.ts" "$@"

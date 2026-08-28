@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-PROJECT_DIR="${CLAUDE_PROJECT_DIR:-${PWD}}"
+# Dependencies belong to the current working directory. The installed skill
+# may live elsewhere, so its directory is not the dependency location.
+WORKING_DIRECTORY="$(pwd -P)"
 
 required_packages=(
   "@effect/platform-node-shared"
@@ -21,7 +23,7 @@ package_specs=(
   "effect@4.0.0-rc.112"
 )
 
-cd "${PROJECT_DIR}"
+cd "${WORKING_DIRECTORY}"
 if command -v bun >/dev/null 2>&1; then
   install_dependencies() {
     bun add --no-save --trust "${package_specs[@]}"
@@ -55,12 +57,12 @@ fi
 
 if install_dependencies >&2; then
   for package in "${required_packages[@]}"; do
-    if [ ! -f "${PROJECT_DIR}/node_modules/${package}/package.json" ]; then
+    if [ ! -f "${WORKING_DIRECTORY}/node_modules/${package}/package.json" ]; then
       printf 'error: Ascendant dependencies were not installed\ncode: SETUP_FAILED\nhelp: Run setup again after checking the package manager output'
       exit 1
     fi
   done
-  printf 'setup:\n  status: installed\n  root: %s\n' "${PROJECT_DIR}"
+  printf 'setup:\n  status: installed\n  directory: %s\n' "${WORKING_DIRECTORY}"
 else
   printf 'error: Dependency installation failed\ncode: SETUP_FAILED\nhelp: Run setup again after checking the package manager output'
   exit 1
