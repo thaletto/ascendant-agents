@@ -1,42 +1,41 @@
 ---
 name: ascendant
-description: Answer Vedic astrology readings and timing questions from a saved person record. Use when the user asks for an astrology interpretation, timing, chart calculation, person initialization, or transit check.
+description: Vedic astrology readings and timing from a saved person record. Use when asked for chart calculation, person init, transit check, or interpretation.
 ---
 
-# Ascendant
+## Routing
 
-Use computed artifacts as evidence. Give the conclusion first; separate calculation facts from interpretation; express timing as a supported window, never a guarantee. Known facts, consent, availability, safety, and professional medical, legal, and financial evidence outrank astrological interpretation.
+Check from the agent current working directory:
 
-Reframe fixed questions: preserve the underlying concern, then answer through chart-supported qualities, patterns, choices, or preparation, with tendencies and confidence limits.
+```bash
+test -d ./persons && echo present || echo missing
+```
 
-Person records live in the current working directory at `persons/<name>/`.
+If `missing`, follow `instructions/setup.md` in this skill before any reading. Do not attempt chart or transit work until `persons/<name>/` exists.
 
-`<ascendant-skill-dir>` in [setup.md](setup.md) is this installed skill's
-directory. Resolve it from this file before running a script.
+If `present`, answer from the saved record plus `smfs grep` over this skill `references/` directory.
 
-## Person memory
+## First run (persons missing)
 
-The user record is the active person record that the user identifies as their own.
+Follow `instructions/setup.md`:
 
-When the user provides or corrects a personal fact, update the user record's `MEMORY.md` in the same turn. Read the file before editing it. Preserve its YAML frontmatter. Record only facts that the user directly states or confirms. Replace an outdated or contradictory fact with the current fact. Keep generated interpretations and unconfirmed information outside the memory.
+1. Run setup once in the current working directory.
+2. Get name, exact ISO 8601 birth moment with Z or offset, latitude, longitude.
+3. Create or refresh the record, then continue below.
 
-Write the memory body in ASD-STE100 Simplified Technical English:
+## Readings (persons present)
 
-- Use active voice and simple tenses.
-- Use the same word for the same meaning.
-- Start each saved fact with the Markdown bullet marker `* `.
-- Write one complete fact sentence in each bullet.
-- Use no more than 25 words in each sentence.
-- Use literal language without idioms.
+1. Resolve `<skill-dir>` as the directory holding this SKILL.md.
+2. Search `references/` for query-relevant method only. Do not dump whole files. Prefer `smfs`; on Windows or when `smfs` is missing use PowerShell:
 
-## Session flow
+```bash
+smfs grep "<query keywords>" "<skill-dir>/references"
+```
 
-1. At session start, resolve the active person record and its ownership. Ask which record belongs to the user when ownership is unclear. Complete this step when the active record and its ownership are known.
-2. Locate `persons/<name>/`. When it is absent or dependencies are unavailable, read [setup.md](setup.md), obtain exact birth input, and initialize the record. Complete this step when the person record is ready.
-3. When the active record belongs to the user, read its `MEMORY.md` before chart analysis. Complete this step when every current memory fact is in context.
-4. When the user provides or corrects a personal fact, apply the person-memory rules before chart analysis. Complete this step when the frontmatter is unchanged and the memory contains one current version of the fact.
-5. Resolve the outcome and relevant time horizon. Ask for the outcome when a question such as “When will I get…?” leaves it unstated.
-6. Read [the judgement hierarchy](references/judgement-hierarchy.md). For a Mahadasha, Antardasha, or Pratyantardasha question, also read [Mahadasha and Antardashas](references/mahadasha-and-antardashas.md). For a nakshatra or pada question, or when a dasha lord's nakshatra/pada is part of the reading, also read [Nakshatras and Padas](references/nakshatras-and-padas.md). Then read the TOON-formatted text file `charts/D1.txt` and every artifact relevant to the question: the applicable divisional chart, `dasha.txt`, relevant `yoga.txt` and `jaimini/` results, and `sav.txt` as supporting strength.
-7. For a named date, present question, or narrow timing trigger, run `ascendant_check_transit` when available; otherwise run `scripts/check-transit.sh`. Run it once per cited moment and treat its stdout as the transit evidence.
-8. Form each insight independently from a source fact. Reconcile corroboration and opposition with the hierarchy. Complete this step only when every relevant available artifact is either used or explicitly excluded.
-9. Answer the question, then give the strongest evidence, meaningful counterevidence, any supported timing window, and confidence limits. Cite the artifact path beside each calculation claim.
+```powershell
+Get-Command smfs -ErrorAction SilentlyContinue
+Get-ChildItem "<skill-dir>/references" -Recurse -Include *.md,*.csv | Select-String -Pattern "<keyword1>|<keyword2>" | Select-Object -First 20 Path,LineNumber,Line
+```
+
+3. Open only the top hits under `<skill-dir>/references/kp/` or `<skill-dir>/references/parashari/` needed for the query.
+4. Base timing and promise claims on the saved `persons/<name>/` record, not on reference text alone.

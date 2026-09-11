@@ -8,7 +8,6 @@ import {
   RashiDrishti,
   SAV,
   Upapada,
-  Yoga,
 } from "astro-ascendant";
 import { DateTime, Effect, FileSystem, Path, Schema } from "effect";
 
@@ -16,7 +15,6 @@ import {
   decodeMoment,
   type Latitude,
   type Longitude,
-  makeLocatedMoment,
   type OffsetMoment,
   type PersonName,
   PersonRecordConflict,
@@ -24,6 +22,7 @@ import {
   readLegacyStoredPerson,
   readLegacyToonStoredPerson,
   readStoredPerson,
+  type Sex,
   writeToon,
   type StoredPerson,
 } from "./common.ts";
@@ -38,7 +37,6 @@ export interface PersonInitialization {
     readonly charts: number;
     readonly dashas: number;
     readonly jaimini: number;
-    readonly yogas: number;
   };
 }
 
@@ -49,6 +47,7 @@ function formatMemory(storedPerson: StoredPerson): string {
     `birth: ${storedPerson.moment}`,
     `latitude: ${storedPerson.latitude}`,
     `longitude: ${storedPerson.longitude}`,
+    ...(storedPerson.sex !== undefined ? [`sex: ${storedPerson.sex}`] : []),
     "---",
     "",
   ].join("\n");
@@ -135,23 +134,22 @@ export const initializePerson = Effect.fn("Ascendant.initializePerson")(
     }
 
     const birthDate = yield* decodeMoment(storedPerson.moment);
-    const locatedMoment = makeLocatedMoment(
-      birthDate,
-      storedPerson.latitude,
-      storedPerson.longitude,
-    );
+    const birthMoment = Chart.Moment.make({ date: birthDate });
     const calculation = yield* Chart.generate(
-      locatedMoment,
+      {
+        moment: birthMoment,
+        latitude: storedPerson.latitude,
+        longitude: storedPerson.longitude,
+        ...(storedPerson.sex !== undefined ? { sex: storedPerson.sex } : {}),
+      },
       Chart.Division.literals,
     );
     const placements = calculation.placements;
-    const birthMoment = locatedMoment.moment;
 
-    const [dasha, sav, yoga] = yield* Effect.all(
+    const [dasha, sav] = yield* Effect.all(
       [
         Dasha.calculate(birthMoment, placements),
         SAV.calculate(placements),
-        Yoga.evaluateAll(calculation),
       ],
       { concurrency: "unbounded" },
     );
@@ -188,7 +186,6 @@ export const initializePerson = Effect.fn("Ascendant.initializePerson")(
     const chartsDirectory = path.join(personDirectory, "charts");
     const jaiminiDirectory = path.join(personDirectory, "jaimini");
     const memoryFile = path.join(personDirectory, "MEMORY.md");
-    const presentYogas = yoga.results.filter((result) => result.present);
     yield* fs.makeDirectory(chartsDirectory, { recursive: true });
     yield* fs.makeDirectory(jaiminiDirectory, { recursive: true });
     if (!(yield* fs.exists(memoryFile))) {
@@ -210,10 +207,6 @@ export const initializePerson = Effect.fn("Ascendant.initializePerson")(
         writeToon(inputFile, storedPerson),
         writeToon(path.join(personDirectory, "dasha.txt"), formatDasha(dasha)),
         writeToon(path.join(personDirectory, "sav.txt"), sav),
-        writeToon(path.join(personDirectory, "yoga.txt"), {
-          provenance: yoga.provenance,
-          results: presentYogas,
-        }),
         writeToon(
           path.join(jaiminiDirectory, "chara-karakas.txt"),
           charaKarakas,
@@ -240,6 +233,7 @@ export const initializePerson = Effect.fn("Ascendant.initializePerson")(
       [
         ...generatedArtifactFiles(path, personDirectory, "toon"),
         ...generatedArtifactFiles(path, personDirectory, "json"),
+        path.join(personDirectory, "yoga.txt"),
       ].map((file) => fs.remove(file, { force: true })),
       { concurrency: "unbounded" },
     );
@@ -254,7 +248,6 @@ export const initializePerson = Effect.fn("Ascendant.initializePerson")(
         charts: calculation.charts.length,
         dashas: dasha.length,
         jaimini: 6,
-        yogas: presentYogas.length,
       },
     } satisfies PersonInitialization;
   },
@@ -267,6 +260,7 @@ export const initializePersonFromInput = Effect.fn(
   moment: OffsetMoment,
   latitude: Latitude,
   longitude: Longitude,
+  sex?: Sex,
 ) {
   const birthDate = yield* decodeMoment(moment);
   const storedPerson: StoredPerson = {
@@ -275,6 +269,7 @@ export const initializePersonFromInput = Effect.fn(
     moment: DateTime.formatIso(birthDate),
     latitude,
     longitude,
+    ...(sex !== undefined ? { sex } : {}),
   };
 
   return yield* initializePerson(storedPerson);

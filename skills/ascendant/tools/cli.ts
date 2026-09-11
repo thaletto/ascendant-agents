@@ -12,12 +12,13 @@ import {
   PersonRecordConflict,
   PersonRecordNotFound,
   PlatformLayer,
+  Sex,
 } from "./common.ts";
 import { initializePersonFromInput } from "./init-person.ts";
 
 const DESCRIPTION = "Calculate saved Vedic astrology records and transits";
 const INIT_PERSON_HELP =
-  "Run `ascendant init-person --name \"<name>\" --moment \"<ISO-8601>\" --latitude <latitude> --longitude <longitude>`";
+  "Run `ascendant init-person --name \"<name>\" --moment \"<ISO-8601>\" --latitude <latitude> --longitude <longitude> [--sex Male|Female]`";
 const TRANSIT_HELP =
   "Run `ascendant transit --name \"<name>\" --moment \"<ISO-8601>\"`";
 const TOP_LEVEL_HELP = `${encode({
@@ -54,6 +55,7 @@ const InitPersonCommandInput = Schema.Struct({
   moment: OffsetMoment,
   latitude: Latitude,
   longitude: Longitude,
+  sex: Schema.optional(Sex),
 });
 
 interface InitPersonCommandInput extends Schema.Schema.Type<
@@ -186,19 +188,20 @@ const transitWorkflow = Effect.fn("Ascendant.transitWorkflow")(function* (
 
 const initPersonWorkflow = Effect.fn("Ascendant.initPersonWorkflow")(
   function* (args: ReadonlyArray<string>) {
-    const parsed = parseFlags(
-      "init-person",
-      args,
-      ["--name", "--moment", "--latitude", "--longitude"],
-      ["--name", "--moment", "--latitude", "--longitude"],
-      INIT_PERSON_HELP,
-    );
-    const input = yield* Schema.decodeUnknownEffect(InitPersonCommandInput)({
-      name: flagValue(parsed, "--name"),
-      moment: flagValue(parsed, "--moment"),
-      latitude: Number(flagValue(parsed, "--latitude")),
-      longitude: Number(flagValue(parsed, "--longitude")),
-    }).pipe(
+  const parsed = parseFlags(
+    "init-person",
+    args,
+    ["--name", "--moment", "--latitude", "--longitude", "--sex"],
+    ["--name", "--moment", "--latitude", "--longitude"],
+    INIT_PERSON_HELP,
+  );
+  const input = yield* Schema.decodeUnknownEffect(InitPersonCommandInput)({
+    name: flagValue(parsed, "--name"),
+    moment: flagValue(parsed, "--moment"),
+    latitude: Number(flagValue(parsed, "--latitude")),
+    longitude: Number(flagValue(parsed, "--longitude")),
+    ...(parsed["--sex"] !== undefined ? { sex: parsed["--sex"] } : {}),
+  }).pipe(
       Effect.mapError(
         (error) =>
           new AxiError(error.message, "VALIDATION_ERROR", [INIT_PERSON_HELP]),
@@ -210,6 +213,7 @@ const initPersonWorkflow = Effect.fn("Ascendant.initPersonWorkflow")(
       input.moment,
       input.latitude,
       input.longitude,
+      input.sex,
     ).pipe(
       Effect.mapError((error) =>
         domainError(error, input.name, {
@@ -235,7 +239,7 @@ const homeView = Effect.fn("Ascendant.homeView")(function* () {
         records: [],
       },
       help: [
-        "Run `ascendant init-person --name \"<name>\" --moment \"<ISO-8601>\" --latitude <latitude> --longitude <longitude>`",
+        "Run `ascendant init-person --name \"<name>\" --moment \"<ISO-8601>\" --latitude <latitude> --longitude <longitude> [--sex Male|Female>]`",
       ],
     };
   }
@@ -254,7 +258,7 @@ const homeView = Effect.fn("Ascendant.homeView")(function* () {
     },
     help: [
       "Run `ascendant transit --name \"<name>\" --moment \"<ISO-8601>\"`",
-      "Run `ascendant init-person --name \"<name>\" --moment \"<ISO-8601>\" --latitude <latitude> --longitude <longitude>`",
+      "Run `ascendant init-person --name \"<name>\" --moment \"<ISO-8601>\" --latitude <latitude> --longitude <longitude> [--sex Male|Female>]`",
     ],
   };
 });
@@ -292,9 +296,11 @@ function commandHelp(command: string): string | null {
           "--moment": "Required offset-aware ISO 8601 birth moment",
           "--latitude": "Required latitude from -90 to 90",
           "--longitude": "Required longitude from -180 to 180",
+          "--sex": "Optional birth sex: Male or Female",
         },
         examples: [
           'ascendant init-person --name "Ada" --moment "1990-01-01T12:00:00+05:30" --latitude 12.9716 --longitude 77.5946',
+          'ascendant init-person --name "Ada" --moment "1990-01-01T12:00:00+05:30" --latitude 12.9716 --longitude 77.5946 --sex Female',
         ],
       })}\n`,
     ),

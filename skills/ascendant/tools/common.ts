@@ -50,12 +50,16 @@ export const Longitude = Schema.Finite.pipe(
 );
 export type Longitude = typeof Longitude.Type;
 
+export const Sex = Schema.Literals(["Male", "Female"]);
+export type Sex = typeof Sex.Type;
+
 export const StoredPerson = Schema.Struct({
   schemaVersion: Schema.Literal(1),
   name: PersonName,
   moment: OffsetMoment,
   latitude: Latitude,
   longitude: Longitude,
+  sex: Schema.optional(Sex),
 });
 export type StoredPerson = typeof StoredPerson.Type;
 
@@ -99,7 +103,12 @@ export const PlatformLayer: Layer.Layer<FileSystem.FileSystem | Path.Path> =
 
 export const AppLayer = Layer.mergeAll(
   PlatformLayer,
-  AstroParams.DefaultAstroParams,
+  AstroParams.layer(
+    AstroParams.Options.make({
+      ayanamsa: "Krishnamurti",
+      houseSystem: "Placidus",
+    }),
+  ),
   Swisseph.SwissephLayer,
 );
 
@@ -130,7 +139,8 @@ export function personRecordMatches(
     left.name === right.name &&
     left.moment === right.moment &&
     left.latitude === right.latitude &&
-    left.longitude === right.longitude
+    left.longitude === right.longitude &&
+    left.sex === right.sex
   );
 }
 
