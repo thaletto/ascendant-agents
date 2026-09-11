@@ -51,6 +51,10 @@ export const AscendantPlugin: Plugin = async function AscendantPlugin({ $ }) {
             .min(-180)
             .max(180)
             .describe("Birth longitude"),
+          sex: tool.schema
+            .string()
+            .optional()
+            .describe("Birth sex: Male or Female"),
         },
         async execute(args, context) {
           return await runScript(
@@ -65,6 +69,7 @@ export const AscendantPlugin: Plugin = async function AscendantPlugin({ $ }) {
               String(args.latitude),
               "--longitude",
               String(args.longitude),
+              ...(args.sex !== undefined ? ["--sex", args.sex] : []),
             ],
             context.directory,
           );
