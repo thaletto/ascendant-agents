@@ -26,7 +26,7 @@ If `missing`, follow `instructions/setup.md` in this skill before any reading. D
 
 An explicit argument overrides this check: `init` creates the record, `setup` runs setup, `analysis` runs the reading flow.
 
-If `present`, answer from the saved record plus `smfs grep` over this skill `references/` directory.
+If `present`, answer from the saved record plus guidebook method. `persons/` is the smfs-mounted container; `references/` are local skill files.
 
 ## First run (persons missing or `setup`)
 
@@ -47,14 +47,20 @@ Follow `instructions/setup.md`:
 | Timing (when will X happen) or yes/no (will X happen) | `<skill-dir>/references/kp/` |
 | All else: promise, quality, how/why, synthesis, varga, yoga | `<skill-dir>/references/parashari/` |
 
-4. Search for query-relevant method only. Do not dump whole files. Prefer `smfs`; on Windows or when `smfs` is missing use PowerShell:
+4. Search each source with its matching tool. Do not dump whole files:
+   - Person memory lives in the mounted container, so query it with `smfs`:
 
 ```bash
-smfs grep "<astrological keywords>" "<skill-dir>/references/kp"
+smfs grep "<name or person keywords>" ./persons
+```
+
+   - Guidebook method lives in local files, so search the chosen reference dir with plain `grep` (PowerShell on Windows):
+
+```bash
+grep -rhi "<keyword1>|<keyword2>" "<skill-dir>/references/kp" | head -n 20
 ```
 
 ```powershell
-Get-Command smfs -ErrorAction SilentlyContinue
 Get-ChildItem "<skill-dir>/references/kp" -Recurse -Include *.md,*.csv | Select-String -Pattern "<keyword1>|<keyword2>" | Select-Object -First 20 Path,LineNumber,Line
 ```
 

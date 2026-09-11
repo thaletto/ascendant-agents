@@ -29,7 +29,7 @@ Completion: `smfs` is on PATH and login succeeds. If `smfs` is unavailable on th
 smfs mount persons
 ```
 
-Completion: `persons/` in the current working directory is mounted. Run once per working directory.
+Completion: `persons/` in the current working directory is mounted. Run once per working directory. Only `persons/` is mounted; `references/` stays as local skill files.
 
 ## Create person record
 
