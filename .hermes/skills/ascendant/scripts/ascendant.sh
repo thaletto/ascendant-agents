@@ -46,7 +46,17 @@ mkdir -p "${RUNTIME_TOOLS_DIR}"
 if [ ! -e "${RUNTIME_DIR}/.gitignore" ]; then
   printf '*\n' > "${RUNTIME_DIR}/.gitignore"
 fi
-cp "${SKILL_DIR}"/tools/*.ts "${SKILL_DIR}/tools/package.json" "${RUNTIME_TOOLS_DIR}/"
+# Local-only runtime copy: sync the trusted skill sources into the working
+# directory so Node resolves the CWD-installed node_modules. No remote
+# fetch happens here. Explicit allowlist only; add new tool files here.
+cp "${SKILL_DIR}/tools/ascendant.ts" \
+  "${SKILL_DIR}/tools/cli.ts" \
+  "${SKILL_DIR}/tools/common.ts" \
+  "${SKILL_DIR}/tools/check-transit.ts" \
+  "${SKILL_DIR}/tools/init-person.ts" \
+  "${SKILL_DIR}/tools/version.ts" \
+  "${SKILL_DIR}/tools/package.json" \
+  "${RUNTIME_TOOLS_DIR}/"
 
 cd "${WORKING_DIRECTORY}"
 exec "${RUNTIME[@]}" "${RUNTIME_TOOLS_DIR}/ascendant.ts" "$@"

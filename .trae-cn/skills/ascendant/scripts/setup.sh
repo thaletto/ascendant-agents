@@ -32,15 +32,24 @@ elif command -v npm >/dev/null 2>&1; then
   install_dependencies() {
     local npm_major
 
+    # Install first with scripts disabled so no dependency lifecycle
+    # script runs by default (npm 11 blocks them anyway).
     if ! npm install \
       --no-save \
       --no-package-lock \
       --no-audit \
       --no-fund \
+      --ignore-scripts \
       "${package_specs[@]}"; then
       return 1
     fi
 
+    # Only these pinned native packages need compiled install scripts.
+    # The package arguments scope the rebuild to exactly these two;
+    # --dangerously-allow-all-scripts only lifts the npm 11 script
+    # policy for this rebuild invocation (npm rejects the scoped
+    # --allow-scripts CLI flag in project scope, so the broad flag is
+    # required here even though the target set stays narrow).
     npm_major="$(npm --version)"
     npm_major="${npm_major%%.*}"
     if [[ "${npm_major}" =~ ^[0-9]+$ ]] && [ "${npm_major}" -ge 11 ]; then
