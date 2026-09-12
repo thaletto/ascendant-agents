@@ -1,5 +1,7 @@
 # Ascendant Agents
 
+[![skills.sh](https://skills.sh/b/thaletto/ascendant-agents)](https://skills.sh/thaletto/ascendant-agents)
+
 Agent skills and tools for Vedic astrology calculations with [`astro-ascendant`](https://www.npmjs.com/package/astro-ascendant) and Effect.
 
 ## What
