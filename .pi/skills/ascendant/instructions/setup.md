@@ -35,13 +35,22 @@ Login is once per machine. It prompts for a Supermemory API key from console.sup
 
 Completion: `smfs` is on PATH and login succeeds. If `smfs` is unavailable on this platform, skip login and mount and continue without it.
 
-## Mount persons container
+## Mount persons and references containers
+
+`persons/` mounts in the agent current working directory. `references/`
+lives under the installed skill directory, not necessarily the current
+directory, so it mounts at its skill path:
 
 ```bash
 smfs mount persons
+smfs mount references --path "<ascendant-skill-dir>/references"
 ```
 
-Completion: `persons/` in the current working directory is mounted. Run once per working directory. Only `persons/` is mounted; `references/` stays as local skill files.
+Completion: `persons/` in the current working directory is mounted and
+`references/` under the skill directory is mounted. Run once per working
+directory (persons) and once per skill install (references). Mounting
+preserves the shipped local reference files. Both are smfs-mounted
+containers afterwards.
 
 ## Create person record
 

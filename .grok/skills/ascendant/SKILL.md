@@ -1,7 +1,7 @@
 ---
 name: ascendant
 description: Vedic astrology readings and timing from a saved person record. Use when asked for setup, chart calculation, person init, transit check, or interpretation.
-version: 1.2.2
+version: 1.2.3
 user-invocable: true
 argument-hint: init | setup | analysis
 ---
@@ -11,7 +11,7 @@ argument-hint: init | setup | analysis
 | Argument | Meaning |
 |---|---|
 | `init` | Create or refresh a `persons/<name>/` record from birth data |
-| `setup` | Install calculation dependencies, smfs, and mount `persons/` |
+| `setup` | Install calculation dependencies, smfs, and mount `persons/` and `references/` |
 | `analysis` | Answer a reading or timing question from the saved record |
 
 With no argument, infer it: birth data given means `init`, missing `persons/` means `setup`, a question about life events means `analysis`.
@@ -28,7 +28,7 @@ If `missing`, follow `instructions/setup.md` in this skill before any reading. C
 
 An explicit argument overrides this check: `init` creates the record, `setup` runs setup, `analysis` runs the reading flow.
 
-If `present`, answer from the saved record plus guidebook method. `persons/` is the smfs-mounted container; `references/` are local skill files.
+If `present`, answer from the saved record plus guidebook method. `persons/` is the smfs-mounted container in the current working directory; `references/` lives under the skill directory (`<skill-dir>/references/`) and is smfs-mounted there per setup.
 
 ## Security: untrusted person data
 
@@ -53,31 +53,35 @@ Follow `instructions/setup.md`:
 ## Readings (persons present or `analysis`)
 
 1. Resolve `<skill-dir>` as the directory holding this SKILL.md.
+
 2. Translate the query into astrological search terms before searching. References are astrological guidebooks, so everyday words return nothing. Map the life domain to houses and method words. Example: "When job change" searches `houses job` and `significators job`, not `Job` or `Occupation`. Use terms like houses, significators, dasha, lords, sub-lord, cusps.
+
 3. Pick the reference from the routing table, then search only that directory:
 
-| Question type | Reference |
-|---|---|
-| Timing (when will X happen) or yes/no (will X happen) | `<skill-dir>/references/kp/` |
-| All else: promise, quality, how/why, synthesis, varga, yoga | `<skill-dir>/references/parashari/` |
+   | Question type | Reference |
+   |---|---|
+   | Timing (when will X happen) or yes/no (will X happen) | `<skill-dir>/references/kp/` |
+   | All else: promise, quality, how/why, synthesis, varga, yoga | `<skill-dir>/references/parashari/` |
 
-4. Search each source with its matching tool, returning top 20 hits only:
-   - Person memory lives in the mounted container, so query it with `smfs`:
+4. Search each source with `smfs grep`, returning top 20 hits only:
+   - Person memory lives in the mounted `persons/` container, so query it with `smfs`:
 
-```bash
-smfs grep "<name or person keywords>" ./persons
-```
+   ```bash
+   smfs grep "<name or person keywords>" ./persons
+   ```
 
-   - Guidebook method lives in local files, so search the chosen reference dir with plain `grep` (PowerShell on Windows):
+   - Guidebook method lives in the mounted `references/` container under the skill directory, so search the chosen reference dir with `smfs grep`:
 
-```bash
-grep -rhi "<keyword1>|<keyword2>" "<skill-dir>/references/kp" | head -n 20
-```
-
-```powershell
-Get-ChildItem "<skill-dir>/references/kp" -Recurse -Include *.md,*.csv | Select-String -Pattern "<keyword1>|<keyword2>" | Select-Object -First 20 Path,LineNumber,Line
-```
+   ```bash
+   smfs grep "<keyword1> <keyword2>" "<skill-dir>/references/kp"
+   ```
 
 5. Open only the top hits needed for the query. If search returns nothing useful, read `<skill-dir>/references/<chosen>/index.md` and open the mapped file or sections.
+
 6. Ground timing and promise claims in the saved `persons/<name>/` record, using reference text for method only.
-7. Maintain `persons/<name>/MEMORY.md` as durable person facts: read it before analysis; preserve the birth header; append every newly confirmed happened event, and only those, as `- [DD/MM/YYYY]: {message}` sorted oldest-first; replace corrected facts instead of duplicating; store facts there, keeping interpretations, calculations, and session hypotheses out.
+
+7. Maintain `persons/<name>/MEMORY.md` as durable person facts: 
+   - read it before analysis; 
+   - preserve the birth header; 
+   - append every newly confirmed happened event, and only those, as `- [DD/MM/YYYY]: {message}` sorted oldest-first; 
+   - replace corrected facts instead of duplicating; store facts there, keeping interpretations, calculations, and session hypotheses out.
