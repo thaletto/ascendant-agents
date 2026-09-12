@@ -2,11 +2,11 @@
 
 [![skills.sh](https://skills.sh/b/thaletto/ascendant-agents)](https://skills.sh/thaletto/ascendant-agents)
 
-Agent skills and tools for Vedic astrology calculations with [`astro-ascendant`](https://www.npmjs.com/package/astro-ascendant) and Effect.
+Save a birth record once, then ask reading and timing questions. You get answers grounded in stored charts, so the same input always gives the same result.
 
 ## What
 
-The Ascendant skill turns a saved birth record into evidence-backed Vedic astrology readings. It has three arguments:
+The Ascendant skill turns a saved birth record into evidence-backed astrology readings. It has three arguments:
 
 - `init` creates or refreshes a reusable `persons/<name>/` record (chart, dasha, Ashtakavarga, Jaimini artifacts) from exact birth data;
 - `setup` installs calculation dependencies, smfs, and the `persons/` mount once per working directory;
