@@ -1,7 +1,6 @@
 ---
 name: ascendant
 description: Vedic astrology readings and timing from a saved person record. Use when asked for setup, chart calculation, person init, transit check, or interpretation.
-version: 1.2.2
 user-invocable: true
 argument-hint: init | setup | analysis
 ---

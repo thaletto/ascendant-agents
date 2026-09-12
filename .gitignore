@@ -49,7 +49,11 @@ sample/
 .DS_Store
 .vscode/
 .zed/
-.cursor/
+# Generated per-harness skill copies are tracked (see scripts/build-skill.mjs);
+# only untracked IDE state under .cursor/ stays ignored.
+.cursor/*
+!.cursor/skills
+!.cursor/skills/**
 
 # Personal Information
 persons/

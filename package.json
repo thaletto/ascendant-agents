@@ -8,6 +8,7 @@
     "init-person": "node --experimental-strip-types skills/ascendant/tools/ascendant.ts init-person",
     "check-transit": "node --experimental-strip-types skills/ascendant/tools/ascendant.ts transit",
     "test": "bun test",
+    "build:skill": "node scripts/build-skill.mjs",
     "typecheck": "tsc --project skills/ascendant/tsconfig.json --noEmit && tsc --project .opencode/tsconfig.json --noEmit"
   },
   "dependencies": {
