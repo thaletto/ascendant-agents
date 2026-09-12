@@ -37,20 +37,20 @@ Completion: `smfs` is on PATH and login succeeds. If `smfs` is unavailable on th
 
 ## Mount persons and references containers
 
-`persons/` mounts in the agent current working directory. `references/`
-lives under the installed skill directory, not necessarily the current
-directory, so it mounts at its skill path:
+Copy the shipped guidebooks from the installed skill directory into the
+agent current working directory, then mount both containers there:
 
 ```bash
+test -d ./references || cp -R "<ascendant-skill-dir>/references" ./references
 smfs mount persons
-smfs mount references --path "<ascendant-skill-dir>/references"
+smfs mount references
 ```
 
-Completion: `persons/` in the current working directory is mounted and
-`references/` under the skill directory is mounted. Run once per working
-directory (persons) and once per skill install (references). Mounting
-preserves the shipped local reference files. Both are smfs-mounted
-containers afterwards.
+Completion: `persons/` and `references/` in the current working directory
+are mounted. Run once per working directory. The copy is skipped when
+`./references/` already exists, so re-running never nests a duplicate.
+Mounting preserves the copied local reference files. Both are
+smfs-mounted containers afterwards.
 
 ## Create person record
 
