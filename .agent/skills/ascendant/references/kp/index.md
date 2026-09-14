@@ -1,6 +1,6 @@
 ## KP references index
 
-Before applying these rules, retrieve `persons/<name>/kp/D1.txt` and `persons/<name>/kp/dasha.txt`. Confirm `calculation.school` is `KP`, ayanamsha is `Krishnamurti`, and house system is `Placidus`. Use that D1 for cusps, star lord, sub lord, and sub-sub lord. Do not use `persons/<name>/charts/` house placements for KP judgment.
+Before applying these rules, retrieve `kp/D1.txt` and `kp/dasha.txt` from the person record in context (`./persons/<name>/` or a record the user provided). Confirm `calculation.school` is `KP`, ayanamsha is `Krishnamurti`, and house system is `Placidus`. Use that D1 for cusps, star lord, sub lord, and sub-sub lord. Do not use Vedic `charts/` house placements for KP judgment.
 
 | File | Use for |
 |---|---|

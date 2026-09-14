@@ -1,62 +1,33 @@
-## Ascendant setup
+# Setup
 
-Use this guide when `persons/<name>/` is absent or an Ascendant command reports missing dependencies.
+Reach this file when `init` or transit must run and packages are missing, on a host that can write the working directory and run skill scripts. Otherwise stay in `SKILL.md`: take person evidence from the user and read `<skill-dir>/references/`.
 
-## Install calculation dependencies
+`<ascendant-skill-dir>` is the installed skill directory (the folder that contains this `instructions/` tree).
 
-From the agent current working directory, run setup once from the installed skill. Setup installs packages into that directory `node_modules`.
+## Packages
+
+From the working directory:
 
 ```bash
 bash "<ascendant-skill-dir>/scripts/setup.sh"
 ```
 
-Completion: setup reports `status: installed` and the current working directory. It installs the calculation packages into that directory `node_modules` without saving them to an existing package manifest or writing a lockfile, and it preserves person records. Bun is used when available; otherwise Node with npm is sufficient. The command wrappers refresh a self-ignored `.ascendant-agent/tools/` copy in the current working directory so those files resolve the same packages.
+Done when stdout reports `status: installed` for that directory. Treat package-manager warnings as noise. The script writes packages into `node_modules` without changing an existing package manifest, lockfile, or person records.
 
-## Install smfs
-
-Approval gate: before downloading or running the smfs installer, ask
-the human for approval via tool with Yes/No options and proceed only
-on an explicit Yes. Do not run any install command without that approval.
-
-Verify first, then install (only after Yes). Do not pipe an uninspected remote script
-directly to a shell. Download it, read it, then run the local copy:
+## Guidebooks
 
 ```bash
-curl -fsSL https://smfs.ai/install -o /tmp/smfs-install.sh
-less /tmp/smfs-install.sh
-bash /tmp/smfs-install.sh
-smfs login
+rm -rf ./references
+cp -R "<ascendant-skill-dir>/references" ./references
 ```
 
-Only `https://smfs.ai/install` over HTTPS is expected. If the script
-content looks unrelated to smfs/Supermemory, stop and do not run it.
+Done when `./references/kp/` and `./references/parashari/` exist. The `rm` makes a re-run replace the previous copy rather than nest `references/references`.
 
-Login is once per machine. It prompts for a Supermemory API key from console.supermemory.ai. Prefer the interactive prompt so the key stays out of shell history; do not pass `--key sm_...` on a shared command line. If `smfs whoami` already shows a user, skip login.
+## Person record
 
-Completion: `smfs` is on PATH and login succeeds. If `smfs` is unavailable on this platform, skip login and mount and continue without it.
+Collect name, an ISO 8601 moment with `Z` or an explicit UTC offset, latitude, and longitude. Resolve place name and historical offset first. Sex is optional.
 
-## Mount persons and references containers
-
-Copy the shipped guidebooks from the installed skill directory into the
-agent current working directory, then mount both containers there:
-
-```bash
-test -d ./references || cp -R "<ascendant-skill-dir>/references" ./references
-smfs mount persons
-smfs mount references
-```
-
-Completion: `persons/` and `references/` in the current working directory
-are mounted. Run once per working directory. The copy is skipped when
-`./references/` already exists, so re-running never nests a duplicate.
-Mounting preserves the copied local reference files. Both are
-smfs-mounted containers afterwards.
-
-## Create person record
-
-Obtain the person name, an exact birth moment in ISO 8601 form with `Z` or an explicit UTC offset, and latitude and longitude. Resolve a place name and historical offset before proceeding. Birth sex is optional.
-
-Invoke `ascendant_init_person` when the host exposes it. Otherwise run:
+Invoke `ascendant_init_person` when the host exposes it. Otherwise:
 
 ```bash
 bash "<ascendant-skill-dir>/scripts/init-person.sh" \
@@ -67,4 +38,4 @@ bash "<ascendant-skill-dir>/scripts/init-person.sh" \
   --sex Female
 ```
 
-Completion: stdout reports the saved record. The record contains `input.txt`, `MEMORY.md`, Vedic `charts/` (D1–D60, Lahiri + WholeSign), Vedic `dasha.txt` (Vimshottari from the Lahiri Moon), `kp/D1.txt` and `kp/dasha.txt` (Krishnamurti + Placidus, Vimshottari from the KP Moon), `sav.txt`, and `jaimini/` artifacts. Chart and dasha `.txt` files include a `calculation` object with school, ayanamsha, house system, and dasha system. Generated `.txt` files contain TOON-formatted text. `MEMORY.md` starts with the person birth details and its header is preserved during a refresh, with confirmed events appended below per `SKILL.md`. A matching `.toon` or `.json` record migrates its generated artifacts to `.txt` during refresh. Identical input refreshes the record; different birth data for the same name requires a new name.
+Done when stdout reports `created` or `refreshed` for `persons/<name>/` and that directory contains `input.txt`, `MEMORY.md`, `charts/`, `dasha.txt`, `kp/`, `sav.txt`, and `jaimini/`. Identical birth data refreshes; different birth data needs another name.

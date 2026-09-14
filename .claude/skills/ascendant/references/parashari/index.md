@@ -1,6 +1,6 @@
 ## Parashari references index
 
-Before applying these rules, retrieve `persons/<name>/charts/` (D1 and the relevant vargas) and `persons/<name>/dasha.txt`. Confirm `calculation.school` is `Parashari`, ayanamsha is `Lahiri`, and house system is `WholeSign`. Do not use `persons/<name>/kp/D1.txt` for house placement or divisional-chart analysis.
+Before applying these rules, retrieve `charts/` (D1 and the relevant vargas) and `dasha.txt` from the person record in context (`./persons/<name>/` or a record the user provided). Confirm `calculation.school` is `Parashari`, ayanamsha is `Lahiri`, and house system is `WholeSign`. Do not use `kp/D1.txt` for house placement or divisional-chart analysis.
 
 All material lives in advanced-chart-analysis.md. Section numbers below.
 
