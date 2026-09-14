@@ -9,10 +9,10 @@ Save a birth record once, then ask reading and timing questions. You get answers
 The Ascendant skill turns a saved birth record into evidence-backed astrology readings. It has three arguments:
 
 - `init` creates or refreshes a reusable `persons/<name>/` record (Vedic charts and dasha, KP D1 and dasha, Ashtakavarga, Jaimini artifacts) from exact birth data;
-- `setup` installs calculation dependencies, smfs, and the `persons/` mount once per working directory;
+- `setup` installs calculation dependencies when `init` or transit tools must run. Guidebooks stay in the installed skill; smfs is not required.
 - `analysis` answers a reading or timing question from the saved record, grounding claims in stored charts and method references (KP for timing/yes-no, Parashari for promise/quality/synthesis).
 
-With no argument it infers one: birth data means `init`, a missing `persons/` means `setup`, a life question means `analysis`.
+With no argument it infers one: birth data on a writable host means `init`, missing calculation dependencies when tools must run means `setup`, a life question with person evidence means `analysis`.
 
 ## Why
 
@@ -20,19 +20,21 @@ Readings stay consistent because three things are separated: deterministic calcu
 
 The skill ships to many harnesses from a single source of truth: `skills/ascendant/SKILL.src.md` plus the skill subtrees. `scripts/build-skill.mjs` generates the canonical `skills/ascendant/SKILL.md` and one copy per harness with the frontmatter each loader honors (`user-invocable` and `argument-hint` only where supported, `metadata.version` for the Codex layout). Edit the source and rebuild; never hand-edit a generated copy.
 
-Setup is documented next to the skill in [`skills/ascendant/instructions/setup.md`](skills/ascendant/instructions/setup.md). It accepts Bun or Node with npm, installs calculation dependencies in the agent's current working directory without saving them to an existing package manifest or writing a lockfile, and never changes person records.
+Setup is documented next to the skill in [`skills/ascendant/instructions/setup.md`](skills/ascendant/instructions/setup.md). It accepts Bun or Node with npm, installs calculation dependencies in the agent's current working directory without saving them to an existing package manifest or writing a lockfile, and never changes person records. It does not copy guidebooks and does not install smfs. On Claude.ai, skip setup: the plugin already ships `<skill-dir>/references/`, and the user provides person or chart artifacts.
 
 ## Installation
 
-### Claude Code plugin
+### Claude plugin
 
-Run these commands inside Claude Code:
+On Claude Code:
 
 ```text
 /plugin marketplace add thaletto/ascendant-agents
 /plugin install ascendant@ascendant
 /reload-plugins
 ```
+
+On Claude.ai the same plugin ships the skill and its guidebooks. Skip smfs, skip copying `references/`, and skip creating `persons/` unless the conversation already has a writable working directory. Attach or paste a person record (or chart artifacts) and read method from the skill's `references/`.
 
 ### Standalone skill
 

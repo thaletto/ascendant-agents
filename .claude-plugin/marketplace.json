@@ -4,7 +4,7 @@
         "name": "Laxman K R",
         "url": "https://thaletto.vercel.app"
     },
-    "description": "Laxman's skills for Astrological analysis and insights, as an installable Claude Code plugin.",
+    "description": "Laxman's skills for Astrological analysis and insights, as an installable Claude plugin.",
     "plugins": [
         {
             "name": "ascendant",

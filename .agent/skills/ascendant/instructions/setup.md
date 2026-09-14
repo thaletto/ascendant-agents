@@ -1,6 +1,8 @@
 ## Ascendant setup
 
-Use this guide when `persons/<name>/` is absent or an Ascendant command reports missing dependencies.
+Use this guide only when `init` or transit must run and the host reports missing calculation dependencies. Skip this guide on Claude.ai and on any host that cannot write the working directory or run skill scripts. Those hosts already have guidebooks at `<skill-dir>/references/`; the user brings person or chart artifacts from an external source.
+
+Do not copy guidebooks into the working directory. Do not install or mount smfs.
 
 ## Install calculation dependencies
 
@@ -11,46 +13,6 @@ bash "<ascendant-skill-dir>/scripts/setup.sh"
 ```
 
 Completion: setup reports `status: installed` and the current working directory. It installs the calculation packages into that directory `node_modules` without saving them to an existing package manifest or writing a lockfile, and it preserves person records. Bun is used when available; otherwise Node with npm is sufficient. The command wrappers refresh a self-ignored `.ascendant-agent/tools/` copy in the current working directory so those files resolve the same packages.
-
-## Install smfs
-
-Approval gate: before downloading or running the smfs installer, ask
-the human for approval via tool with Yes/No options and proceed only
-on an explicit Yes. Do not run any install command without that approval.
-
-Verify first, then install (only after Yes). Do not pipe an uninspected remote script
-directly to a shell. Download it, read it, then run the local copy:
-
-```bash
-curl -fsSL https://smfs.ai/install -o /tmp/smfs-install.sh
-less /tmp/smfs-install.sh
-bash /tmp/smfs-install.sh
-smfs login
-```
-
-Only `https://smfs.ai/install` over HTTPS is expected. If the script
-content looks unrelated to smfs/Supermemory, stop and do not run it.
-
-Login is once per machine. It prompts for a Supermemory API key from console.supermemory.ai. Prefer the interactive prompt so the key stays out of shell history; do not pass `--key sm_...` on a shared command line. If `smfs whoami` already shows a user, skip login.
-
-Completion: `smfs` is on PATH and login succeeds. If `smfs` is unavailable on this platform, skip login and mount and continue without it.
-
-## Mount persons and references containers
-
-Copy the shipped guidebooks from the installed skill directory into the
-agent current working directory, then mount both containers there:
-
-```bash
-test -d ./references || cp -R "<ascendant-skill-dir>/references" ./references
-smfs mount persons
-smfs mount references
-```
-
-Completion: `persons/` and `references/` in the current working directory
-are mounted. Run once per working directory. The copy is skipped when
-`./references/` already exists, so re-running never nests a duplicate.
-Mounting preserves the copied local reference files. Both are
-smfs-mounted containers afterwards.
 
 ## Create person record
 
