@@ -1,24 +1,33 @@
-## Ascendant setup
+# Setup
 
-Use this guide only when `init` or transit must run and the host reports missing calculation dependencies. Skip this guide on Claude.ai and on any host that cannot write the working directory or run skill scripts. Those hosts already have guidebooks at `<skill-dir>/references/`; the user brings person or chart artifacts from an external source.
+Reach this file when `init` or transit must run and packages are missing, on a host that can write the working directory and run skill scripts. Otherwise stay in `SKILL.md`: take person evidence from the user and read `<skill-dir>/references/`.
 
-Do not copy guidebooks into the working directory. Do not install or mount smfs.
+`<ascendant-skill-dir>` is the installed skill directory (the folder that contains this `instructions/` tree).
 
-## Install calculation dependencies
+## Packages
 
-From the agent current working directory, run setup once from the installed skill. Setup installs packages into that directory `node_modules`.
+From the working directory:
 
 ```bash
 bash "<ascendant-skill-dir>/scripts/setup.sh"
 ```
 
-Completion: setup reports `status: installed` and the current working directory. It installs the calculation packages into that directory `node_modules` without saving them to an existing package manifest or writing a lockfile, and it preserves person records. Bun is used when available; otherwise Node with npm is sufficient. The command wrappers refresh a self-ignored `.ascendant-agent/tools/` copy in the current working directory so those files resolve the same packages.
+Done when stdout reports `status: installed` for that directory. Treat package-manager warnings as noise. The script writes packages into `node_modules` without changing an existing package manifest, lockfile, or person records.
 
-## Create person record
+## Guidebooks
 
-Obtain the person name, an exact birth moment in ISO 8601 form with `Z` or an explicit UTC offset, and latitude and longitude. Resolve a place name and historical offset before proceeding. Birth sex is optional.
+```bash
+rm -rf ./references
+cp -R "<ascendant-skill-dir>/references" ./references
+```
 
-Invoke `ascendant_init_person` when the host exposes it. Otherwise run:
+Done when `./references/kp/` and `./references/parashari/` exist. The `rm` makes a re-run replace the previous copy rather than nest `references/references`.
+
+## Person record
+
+Collect name, an ISO 8601 moment with `Z` or an explicit UTC offset, latitude, and longitude. Resolve place name and historical offset first. Sex is optional.
+
+Invoke `ascendant_init_person` when the host exposes it. Otherwise:
 
 ```bash
 bash "<ascendant-skill-dir>/scripts/init-person.sh" \
@@ -29,4 +38,4 @@ bash "<ascendant-skill-dir>/scripts/init-person.sh" \
   --sex Female
 ```
 
-Completion: stdout reports the saved record. The record contains `input.txt`, `MEMORY.md`, Vedic `charts/` (D1–D60, Lahiri + WholeSign), Vedic `dasha.txt` (Vimshottari from the Lahiri Moon), `kp/D1.txt` and `kp/dasha.txt` (Krishnamurti + Placidus, Vimshottari from the KP Moon), `sav.txt`, and `jaimini/` artifacts. Chart and dasha `.txt` files include a `calculation` object with school, ayanamsha, house system, and dasha system. Generated `.txt` files contain TOON-formatted text. `MEMORY.md` starts with the person birth details and its header is preserved during a refresh, with confirmed events appended below per `SKILL.md`. A matching `.toon` or `.json` record migrates its generated artifacts to `.txt` during refresh. Identical input refreshes the record; different birth data for the same name requires a new name.
+Done when stdout reports `created` or `refreshed` for `persons/<name>/` and that directory contains `input.txt`, `MEMORY.md`, `charts/`, `dasha.txt`, `kp/`, `sav.txt`, and `jaimini/`. Identical birth data refreshes; different birth data needs another name.

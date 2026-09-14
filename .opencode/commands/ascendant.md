@@ -1,5 +1,5 @@
 ---
-description: Vedic astrology readings and timing from a saved person record. Use when asked for setup, chart calculation, person init, transit check, or interpretation.
+description: Init a birth record, install calculation setup, or read timing and interpretation from person evidence.
 agent: build
 subtask: true
 ---
