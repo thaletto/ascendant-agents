@@ -27,11 +27,11 @@ const TOP_LEVEL_HELP = `${encode({
   commands: [
     {
       name: "init-person",
-      description: "Create or refresh a complete saved person record",
+      description: "Create or refresh Vedic charts plus a separate KP D1",
     },
     {
       name: "transit",
-      description: "Calculate a D1 transit for a saved person",
+      description: "Calculate a Vedic D1 transit for a saved person",
     },
   ],
   help: ["Run `ascendant <command> --help` for command flags and examples"],
@@ -290,7 +290,7 @@ function commandHelp(command: string): string | null {
     Match.when("init-person", () =>
       `${encode({
         command: "init-person",
-        description: "Create or refresh a complete saved person record",
+        description: "Create or refresh Vedic charts plus a separate KP D1",
         flags: {
           "--name": "Required saved person name",
           "--moment": "Required offset-aware ISO 8601 birth moment",
@@ -307,7 +307,7 @@ function commandHelp(command: string): string | null {
     Match.when("transit", () =>
       `${encode({
         command: "transit",
-        description: "Calculate a D1 transit at a saved person's location",
+        description: "Calculate a Vedic D1 transit at a saved person's location",
         flags: {
           "--name": "Required saved person name",
           "--moment": "Required offset-aware ISO 8601 transit moment",

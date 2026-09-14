@@ -54,6 +54,7 @@ cp "${SKILL_DIR}/tools/ascendant.ts" \
   "${SKILL_DIR}/tools/common.ts" \
   "${SKILL_DIR}/tools/check-transit.ts" \
   "${SKILL_DIR}/tools/init-person.ts" \
+  "${SKILL_DIR}/tools/kp-lords.ts" \
   "${SKILL_DIR}/tools/version.ts" \
   "${SKILL_DIR}/tools/package.json" \
   "${RUNTIME_TOOLS_DIR}/"

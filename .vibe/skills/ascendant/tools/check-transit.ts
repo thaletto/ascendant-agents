@@ -2,6 +2,8 @@ import { Chart } from "astro-ascendant";
 import { DateTime, Effect, Match } from "effect";
 
 import {
+  type CalculationContext,
+  calculationContext,
   decodeMoment,
   makeLocatedMoment,
   type OffsetMoment,
@@ -19,11 +21,16 @@ export interface TransitGraha {
 
 export interface TransitOutput {
   readonly at: string;
+  readonly calculation: CalculationContext;
   readonly lagna: string;
   readonly grahas: ReadonlyArray<TransitGraha>;
 }
 
-function compactChart(at: DateTime.Utc, chart: Chart.Chart): TransitOutput {
+function compactChart(
+  at: DateTime.Utc,
+  chart: Chart.Chart,
+  calculation: CalculationContext,
+): TransitOutput {
   const firstHouse = chart.houses[1];
   const lagna = Match.value(firstHouse.lagna).pipe(
     Match.when(Match.null, () => firstHouse.sign),
@@ -45,6 +52,7 @@ function compactChart(at: DateTime.Utc, chart: Chart.Chart): TransitOutput {
 
   return {
     at: DateTime.formatIso(at),
+    calculation,
     lagna,
     grahas,
   };
@@ -61,6 +69,10 @@ export const calculateTransit = Effect.fn("Ascendant.calculateTransit")(
     );
     const calculation = yield* Chart.generate(locatedMoment, [1]);
 
-    return compactChart(transitDate, calculation.charts[0]);
+    return compactChart(
+      transitDate,
+      calculation.charts[0],
+      calculationContext("Parashari", calculation.astroParams),
+    );
   },
 );
