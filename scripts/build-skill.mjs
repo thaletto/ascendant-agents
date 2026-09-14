@@ -123,6 +123,7 @@ function copyDirPreservingModes(srcDir, destDir) {
     if (entry.isDirectory()) {
       copyDirPreservingModes(src, dest);
     } else if (entry.isFile()) {
+      if (entry.name.endsWith(".test.ts")) continue;
       fs.copyFileSync(src, dest);
       fs.chmodSync(dest, fs.statSync(src).mode & 0o777);
     }

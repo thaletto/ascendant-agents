@@ -101,16 +101,39 @@ const NodeServicesLayer: Layer.Layer<FileSystem.FileSystem | Path.Path> =
 export const PlatformLayer: Layer.Layer<FileSystem.FileSystem | Path.Path> =
   NodeServicesLayer;
 
+export const VedicAstroParams = AstroParams.Options.make({
+  ayanamsa: "Lahiri",
+  houseSystem: "WholeSign",
+});
+
+export const KpAstroParams = AstroParams.Options.make({
+  ayanamsa: "Krishnamurti",
+  houseSystem: "Placidus",
+});
+
+export const VedicAstroParamsLayer = AstroParams.layer(VedicAstroParams);
+export const KpAstroParamsLayer = AstroParams.layer(KpAstroParams);
+
 export const AppLayer = Layer.mergeAll(
   PlatformLayer,
-  AstroParams.layer(
-    AstroParams.Options.make({
-      ayanamsa: "Krishnamurti",
-      houseSystem: "Placidus",
-    }),
-  ),
+  VedicAstroParamsLayer,
   Swisseph.SwissephLayer,
 );
+
+export type CalculationSchool = "Parashari" | "KP";
+export type CalculationContext = ReturnType<typeof calculationContext>;
+
+export function calculationContext(
+  school: CalculationSchool,
+  astroParams: AstroParams.Options,
+) {
+  return {
+    school,
+    ayanamsa: astroParams.ayanamsa,
+    houseSystem: astroParams.houseSystem,
+    dashaSystem: "Vimshottari" as const,
+  };
+}
 
 export const decodeMoment = Effect.fn("Ascendant.decodeMoment")(function* (
   input: OffsetMoment,

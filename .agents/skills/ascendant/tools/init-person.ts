@@ -12,7 +12,9 @@ import {
 import { DateTime, Effect, FileSystem, Path, Schema } from "effect";
 
 import {
+  calculationContext,
   decodeMoment,
+  KpAstroParamsLayer,
   type Latitude,
   type Longitude,
   type OffsetMoment,
@@ -26,6 +28,7 @@ import {
   writeToon,
   type StoredPerson,
 } from "./common.ts";
+import { kpCuspAndPlanetLords } from "./kp-lords.ts";
 
 export interface PersonInitialization {
   readonly person: {
@@ -35,6 +38,7 @@ export interface PersonInitialization {
   };
   readonly artifacts: {
     readonly charts: number;
+    readonly kpCharts: number;
     readonly dashas: number;
     readonly jaimini: number;
   };
@@ -78,6 +82,8 @@ function generatedArtifactFiles(
     path.join(personDirectory, `dasha.${extension}`),
     path.join(personDirectory, `sav.${extension}`),
     path.join(personDirectory, `yoga.${extension}`),
+    path.join(personDirectory, "kp", `D1.${extension}`),
+    path.join(personDirectory, "kp", `dasha.${extension}`),
     ...Chart.Division.literals.map((division) =>
       path.join(personDirectory, "charts", `D${division}.${extension}`),
     ),
@@ -135,26 +141,35 @@ export const initializePerson = Effect.fn("Ascendant.initializePerson")(
 
     const birthDate = yield* decodeMoment(storedPerson.moment);
     const birthMoment = Chart.Moment.make({ date: birthDate });
-    const calculation = yield* Chart.generate(
-      {
-        moment: birthMoment,
-        latitude: storedPerson.latitude,
-        longitude: storedPerson.longitude,
-        ...(storedPerson.sex !== undefined ? { sex: storedPerson.sex } : {}),
-      },
-      Chart.Division.literals,
+    const chartParams = {
+      moment: birthMoment,
+      latitude: storedPerson.latitude,
+      longitude: storedPerson.longitude,
+      ...(storedPerson.sex !== undefined ? { sex: storedPerson.sex } : {}),
+    };
+    const [vedicCalculation, kpCalculation] = yield* Effect.all(
+      [
+        Chart.generate(chartParams, Chart.Division.literals),
+        Chart.generate(chartParams, []).pipe(
+          Effect.provide(KpAstroParamsLayer),
+        ),
+      ],
+      { concurrency: "unbounded" },
     );
-    const placements = calculation.placements;
+    const placements = vedicCalculation.placements;
+    const kpPlacements = kpCalculation.placements;
 
-    const [dasha, sav] = yield* Effect.all(
+    const [dasha, kpDasha, sav] = yield* Effect.all(
       [
         Dasha.calculate(birthMoment, placements),
+        Dasha.calculate(birthMoment, kpPlacements),
         SAV.calculate(placements),
       ],
       { concurrency: "unbounded" },
     );
 
-    const d1 = calculation.charts[0];
+    const d1 = vedicCalculation.charts[0];
+    const kpD1 = kpCalculation.charts[0];
     const lagnaSign = d1.houses[1].sign;
     const [
       charaKarakas,
@@ -184,20 +199,29 @@ export const initializePerson = Effect.fn("Ascendant.initializePerson")(
     );
 
     const chartsDirectory = path.join(personDirectory, "charts");
+    const kpDirectory = path.join(personDirectory, "kp");
     const jaiminiDirectory = path.join(personDirectory, "jaimini");
     const memoryFile = path.join(personDirectory, "MEMORY.md");
     yield* fs.makeDirectory(chartsDirectory, { recursive: true });
+    yield* fs.makeDirectory(kpDirectory, { recursive: true });
     yield* fs.makeDirectory(jaiminiDirectory, { recursive: true });
     if (!(yield* fs.exists(memoryFile))) {
       yield* fs.writeFileString(memoryFile, formatMemory(storedPerson));
     }
 
+    const vedicContext = calculationContext(
+      "Parashari",
+      vedicCalculation.astroParams,
+    );
+    const kpContext = calculationContext("KP", kpCalculation.astroParams);
+    const kpLords = kpCuspAndPlanetLords(kpD1);
+
     yield* Effect.all(
-      calculation.charts.map((chart) =>
-        writeToon(
-          path.join(chartsDirectory, `D${chart.division}.txt`),
-          Schema.encodeSync(Chart.Chart)(chart),
-        ),
+      vedicCalculation.charts.map((chart) =>
+        writeToon(path.join(chartsDirectory, `D${chart.division}.txt`), {
+          calculation: vedicContext,
+          chart: Schema.encodeSync(Chart.Chart)(chart),
+        }),
       ),
       { concurrency: "unbounded" },
     );
@@ -205,7 +229,20 @@ export const initializePerson = Effect.fn("Ascendant.initializePerson")(
     yield* Effect.all(
       [
         writeToon(inputFile, storedPerson),
-        writeToon(path.join(personDirectory, "dasha.txt"), formatDasha(dasha)),
+        writeToon(path.join(personDirectory, "dasha.txt"), {
+          calculation: vedicContext,
+          mahadashas: formatDasha(dasha),
+        }),
+        writeToon(path.join(kpDirectory, "D1.txt"), {
+          calculation: kpContext,
+          chart: Schema.encodeSync(Chart.Chart)(kpD1),
+          cuspLords: kpLords.cuspLords,
+          planetLords: kpLords.planetLords,
+        }),
+        writeToon(path.join(kpDirectory, "dasha.txt"), {
+          calculation: kpContext,
+          mahadashas: formatDasha(kpDasha),
+        }),
         writeToon(path.join(personDirectory, "sav.txt"), sav),
         writeToon(
           path.join(jaiminiDirectory, "chara-karakas.txt"),
@@ -245,7 +282,8 @@ export const initializePerson = Effect.fn("Ascendant.initializePerson")(
         status: personDirectoryExists ? "refreshed" : "created",
       },
       artifacts: {
-        charts: calculation.charts.length,
+        charts: vedicCalculation.charts.length,
+        kpCharts: kpCalculation.charts.length,
         dashas: dasha.length,
         jaimini: 6,
       },

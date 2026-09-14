@@ -15,5 +15,6 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true
   },
-  "include": ["tools/**/*.ts"]
+  "include": ["tools/**/*.ts"],
+  "exclude": ["tools/**/*.test.ts"]
 }

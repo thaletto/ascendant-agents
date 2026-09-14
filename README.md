@@ -8,7 +8,7 @@ Save a birth record once, then ask reading and timing questions. You get answers
 
 The Ascendant skill turns a saved birth record into evidence-backed astrology readings. It has three arguments:
 
-- `init` creates or refreshes a reusable `persons/<name>/` record (chart, dasha, Ashtakavarga, Jaimini artifacts) from exact birth data;
+- `init` creates or refreshes a reusable `persons/<name>/` record (Vedic charts and dasha, KP D1 and dasha, Ashtakavarga, Jaimini artifacts) from exact birth data;
 - `setup` installs calculation dependencies, smfs, and the `persons/` mount once per working directory;
 - `analysis` answers a reading or timing question from the saved record, grounding claims in stored charts and method references (KP for timing/yes-no, Parashari for promise/quality/synthesis).
 
@@ -16,7 +16,7 @@ With no argument it infers one: birth data means `init`, a missing `persons/` me
 
 ## Why
 
-Readings stay consistent because three things are separated: deterministic calculations (same Located Moment always yields the same Placements and charts), durable person memory (`persons/<name>/MEMORY.md` accumulates only confirmed events), and guidebook method (local KP/Parashari references searched per query). Interpretations never substitute for stored evidence.
+Readings stay consistent because three things are separated: deterministic calculations (a Located Moment yields a Lahiri Whole-Sign Vedic chart set plus a separate Krishnamurti Placidus KP D1, each with its own Vimshottari dasha), durable person memory (`persons/<name>/MEMORY.md` accumulates only confirmed events), and guidebook method (local KP/Parashari references searched per query). Interpretations never substitute for stored evidence. Do not mix KP house placements with Parashari reading, or Vedic houses with KP cusp and Sub Lord analysis.
 
 The skill ships to many harnesses from a single source of truth: `skills/ascendant/SKILL.src.md` plus the skill subtrees. `scripts/build-skill.mjs` generates the canonical `skills/ascendant/SKILL.md` and one copy per harness with the frontmatter each loader honors (`user-invocable` and `argument-hint` only where supported, `metadata.version` for the Codex layout). Edit the source and rebuild; never hand-edit a generated copy.
 
