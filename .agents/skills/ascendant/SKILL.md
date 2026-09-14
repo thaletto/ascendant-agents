@@ -1,8 +1,8 @@
 ---
 name: ascendant
-description: Init a birth record, install calculation setup, or read timing and interpretation from person evidence.
+description: Save Birth Chart; Get answers with citations from Parashara, KP astrology references.
 metadata:
-  version: 1.3.0
+  version: 1.3.1
 ---
 
 ## Dispatch

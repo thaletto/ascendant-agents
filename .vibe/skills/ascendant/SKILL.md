@@ -1,7 +1,7 @@
 ---
 name: ascendant
-description: Init a birth record, install calculation setup, or read timing and interpretation from person evidence.
-version: 1.3.0
+description: Save Birth Chart; Get answers with citations from Parashara, KP astrology references.
+version: 1.3.1
 user-invocable: true
 ---
 
