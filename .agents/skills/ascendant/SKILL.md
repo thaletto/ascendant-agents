@@ -2,7 +2,7 @@
 name: ascendant
 description: Save Birth Chart; Get answers with citations from Parashara, KP astrology references.
 metadata:
-  version: 1.3.1
+  version: 1.4.0
 ---
 
 ## Dispatch
