@@ -37,7 +37,7 @@ describe("ruling planets", () => {
 
     expect(result.calculation).toEqual({
       school: "KP",
-      ayanamsa: "Krishnamurti",
+      ayanamsa: "KrishnamurtiVP291",
       houseSystem: "Placidus",
       dashaSystem: "Vimshottari",
     });
@@ -83,7 +83,7 @@ describe("transit schools", () => {
         ).pipe(Effect.provide(KpLayer)),
       );
       expect(kp.calculation.school).toBe("KP");
-      expect(kp.calculation.ayanamsa).toBe("Krishnamurti");
+      expect(kp.calculation.ayanamsa).toBe("KrishnamurtiVP291");
     } finally {
       process.chdir(previous);
       await rm(workspace, { recursive: true, force: true });

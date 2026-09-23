@@ -28,7 +28,7 @@ export type PersonName = typeof PersonName.Type;
 export const OffsetMoment = Schema.String.pipe(
   Schema.check(
     Schema.isPattern(
-      /^\d{4}-\d{2}-\d{2}T.+(?:Z|[+-]\d{2}:\d{2})$/,
+      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:\d{2})$/,
       {
         message:
           "Use an ISO 8601 moment with Z or an explicit UTC offset",
@@ -153,6 +153,17 @@ export function makeLocatedMoment(
   });
 }
 
+function momentsEqual(left: OffsetMoment, right: OffsetMoment): boolean {
+  if (left === right) return true;
+  try {
+    const leftDate = Schema.decodeUnknownSync(Schema.DateTimeUtcFromString)(left);
+    const rightDate = Schema.decodeUnknownSync(Schema.DateTimeUtcFromString)(right);
+    return DateTime.Equivalence(leftDate, rightDate);
+  } catch {
+    return false;
+  }
+}
+
 export function personRecordMatches(
   left: StoredPerson,
   right: StoredPerson,
@@ -160,7 +171,7 @@ export function personRecordMatches(
   return (
     left.schemaVersion === right.schemaVersion &&
     left.name === right.name &&
-    left.moment === right.moment &&
+    momentsEqual(left.moment, right.moment) &&
     left.latitude === right.latitude &&
     left.longitude === right.longitude &&
     left.sex === right.sex

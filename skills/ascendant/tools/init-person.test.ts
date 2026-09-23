@@ -91,7 +91,7 @@ describe("initializePerson chart schools", () => {
 
       expect(kpD1.calculation).toEqual({
         school: "KP",
-        ayanamsa: "Krishnamurti",
+        ayanamsa: "KrishnamurtiVP291",
         houseSystem: "Placidus",
         dashaSystem: "Vimshottari",
       });
@@ -99,7 +99,7 @@ describe("initializePerson chart schools", () => {
       expect(kpD1.cuspLords).toHaveLength(12);
       expect(kpD1.planetLords.some((planet) => planet.name === "Lagna")).toBe(true);
       expect(kpDasha.calculation.school).toBe("KP");
-      expect(kpDasha.calculation.ayanamsa).toBe("Krishnamurti");
+      expect(kpDasha.calculation.ayanamsa).toBe("KrishnamurtiVP291");
       expect(kpDasha.calculation.dashaSystem).toBe("Vimshottari");
 
       const firstCusp = kpD1.chart.houses["1"]?.cusp;

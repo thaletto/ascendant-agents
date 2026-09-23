@@ -82,7 +82,7 @@ words.
 ## Step 2: Retrieve KP chart files
 
 Read `kp/D1.txt` and `kp/dasha.txt` from the person record. Confirm each
-file's `calculation` object is `school: KP`, `ayanamsa: Krishnamurti`,
+file's `calculation` object is `school: KP`, `ayanamsa: KrishnamurtiVP291`,
 `houseSystem: Placidus`, `dashaSystem: Vimshottari`. This one file already
 carries the significator tables. Do not recompute them by hand:
 

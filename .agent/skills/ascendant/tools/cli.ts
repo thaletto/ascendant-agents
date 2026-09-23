@@ -518,7 +518,7 @@ function commandHelp(command: string): string | null {
           "--name": "Required saved person name",
           "--moment": "Required offset-aware ISO 8601 start moment",
           "--planet": "Required graha: Sun, Moon, Mars, Mercury, Venus, Jupiter, Saturn, Rahu, or Ketu",
-          "--school": "Optional school: parashari (default, Lahiri/WholeSign) or kp (Krishnamurti/Placidus)",
+          "--school": "Optional school: parashari (default, Lahiri/WholeSign) or kp (KrishnamurtiVP291/Placidus)",
           "--direction": "Optional search direction: forward (default) or backward",
           "--kinds": "Optional comma-separated kinds (default sign-ingress): sign-ingress, cusp-crossing, longitude-hit, station",
           "--count": "Optional number of events from 1 to 100 (default 5)",

@@ -1,7 +1,7 @@
 ---
 name: ascendant
 description: Save Birth Chart; Get KP-first answers with citations from KP and Parashara references. Parashari only on explicit request.
-version: 2.1.0
+version: 3.0.0
 ---
 
 ## Role
@@ -81,7 +81,7 @@ words.
 ## Step 2: Retrieve KP chart files
 
 Read `kp/D1.txt` and `kp/dasha.txt` from the person record. Confirm each
-file's `calculation` object is `school: KP`, `ayanamsa: Krishnamurti`,
+file's `calculation` object is `school: KP`, `ayanamsa: KrishnamurtiVP291`,
 `houseSystem: Placidus`, `dashaSystem: Vimshottari`. This one file already
 carries the significator tables. Do not recompute them by hand:
 
