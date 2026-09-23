@@ -1,78 +1,85 @@
-import { Chart } from "astro-ascendant";
-import { DateTime, Effect, Match } from "effect";
+import { Chart, Transit } from "astro-ascendant";
+import { DateTime, Effect, Schema } from "effect";
 
 import {
-  type CalculationContext,
   calculationContext,
   decodeMoment,
   makeLocatedMoment,
   type OffsetMoment,
   type PersonName,
   readStoredPerson,
+  VedicAstroParams,
 } from "./common.ts";
 
-export interface TransitGraha {
-  readonly name: string;
-  readonly sign: string;
-  readonly degree: number;
-  readonly house: number;
-  readonly retrograde: boolean;
+export interface TransitSearchOptions {
+  readonly planet: Chart.Planets;
+  readonly direction: Transit.TransitDirection;
+  readonly kinds: ReadonlyArray<Transit.TransitKind>;
+  readonly count: number;
+  readonly targetLongitude?: number;
+  readonly house?: Chart.Houses;
+  readonly maxYears?: number;
+  readonly precisionMinutes?: number;
 }
 
-export interface TransitOutput {
-  readonly at: string;
-  readonly calculation: CalculationContext;
-  readonly lagna: string;
-  readonly grahas: ReadonlyArray<TransitGraha>;
-}
-
-function compactChart(
-  at: DateTime.Utc,
-  chart: Chart.Chart,
-  calculation: CalculationContext,
-): TransitOutput {
-  const firstHouse = chart.houses[1];
-  const lagna = Match.value(firstHouse.lagna).pipe(
-    Match.when(Match.null, () => firstHouse.sign),
-    Match.when(
-      Match.defined,
-      (placement) => `${placement.sign.name} ${placement.degree.toFixed(2)}`,
-    ),
-    Match.exhaustive,
-  );
-  const grahas = Chart.Houses.literals.flatMap((house) =>
-    chart.houses[house].planets.map((planet) => ({
-      name: planet.name,
-      sign: planet.sign.name,
-      degree: Number(planet.degree.toFixed(2)),
-      house,
-      retrograde: planet.is_retrograde,
-    })),
-  );
-
+function formatEvent(event: Transit.TransitEvent) {
   return {
-    at: DateTime.formatIso(at),
-    calculation,
-    lagna,
-    grahas,
+    planet: event.planet,
+    moment: DateTime.formatIso(event.moment),
+    longitude: Number(event.longitude.toFixed(2)),
+    kind: event.kind,
+    ...(event.sign !== undefined ? { sign: event.sign } : {}),
+    retrograde: event.is_retrograde,
+    direction: event.direction,
+    provenance: { ...event.provenance },
+    ...(event.calculation !== undefined
+      ? {
+          chart: Schema.encodeSync(Chart.ChartCalculation)(
+            event.calculation,
+          ),
+        }
+      : {}),
   };
 }
 
-export const calculateTransit = Effect.fn("Ascendant.calculateTransit")(
-  function* (name: PersonName, moment: OffsetMoment) {
+export const searchTransits = Effect.fn("Ascendant.searchTransits")(
+  function* (
+    name: PersonName,
+    moment: OffsetMoment,
+    options: TransitSearchOptions,
+  ) {
     const person = yield* readStoredPerson(name);
-    const transitDate = yield* decodeMoment(moment);
-    const locatedMoment = makeLocatedMoment(
-      transitDate,
+    const fromDate = yield* decodeMoment(moment);
+    const from = makeLocatedMoment(
+      fromDate,
       person.latitude,
       person.longitude,
     );
-    const calculation = yield* Chart.generate(locatedMoment, [1]);
+    const events = yield* Transit.findTransits({
+      planet: options.planet,
+      from,
+      count: options.count,
+      direction: options.direction,
+      kinds: [...options.kinds],
+      ...(options.targetLongitude !== undefined
+        ? {
+            targetLongitude: options.targetLongitude as Chart.Longitude,
+          }
+        : {}),
+      ...(options.house !== undefined ? { house: options.house } : {}),
+      ...(options.maxYears !== undefined
+        ? { maxYears: options.maxYears }
+        : {}),
+      ...(options.precisionMinutes !== undefined
+        ? { precisionMinutes: options.precisionMinutes }
+        : {}),
+      includeCharts: [1],
+    });
 
-    return compactChart(
-      transitDate,
-      calculation.charts[0],
-      calculationContext("Parashari", calculation.astroParams),
-    );
+    return {
+      from: DateTime.formatIso(fromDate),
+      calculation: calculationContext("Parashari", VedicAstroParams),
+      events: events.map(formatEvent),
+    };
   },
 );

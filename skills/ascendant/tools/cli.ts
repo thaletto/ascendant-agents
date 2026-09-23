@@ -1,8 +1,9 @@
 import { encode } from "@toon-format/toon";
+import { Chart, Transit } from "astro-ascendant";
 import { AxiError, exitCodeForError } from "axi-sdk-js";
 import { Effect, FileSystem, Match, Path, Schema } from "effect";
 
-import { calculateTransit } from "./check-transit.ts";
+import { searchTransits } from "./check-transit.ts";
 import {
   AppLayer,
   Latitude,
@@ -16,11 +17,11 @@ import {
 } from "./common.ts";
 import { initializePersonFromInput } from "./init-person.ts";
 
-const DESCRIPTION = "Calculate saved Vedic astrology records and transits";
+const DESCRIPTION = "Calculate saved Vedic astrology records and search transits";
 const INIT_PERSON_HELP =
   "Run `ascendant init-person --name \"<name>\" --moment \"<ISO-8601>\" --latitude <latitude> --longitude <longitude> [--sex Male|Female]`";
 const TRANSIT_HELP =
-  "Run `ascendant transit --name \"<name>\" --moment \"<ISO-8601>\"`";
+  "Run `ascendant transit --name \"<name>\" --moment \"<ISO-8601>\" --planet <graha> [--direction forward|backward] [--kinds sign-ingress,...] [--count <1-100>] [--target-longitude <0-360>] [--house <1-12>] [--max-years <years>] [--precision-minutes <minutes>]`";
 const TOP_LEVEL_HELP = `${encode({
   command: "ascendant",
   description: DESCRIPTION,
@@ -31,7 +32,7 @@ const TOP_LEVEL_HELP = `${encode({
     },
     {
       name: "transit",
-      description: "Calculate a Vedic D1 transit for a saved person",
+      description: "Search upcoming or past transit events for a saved person",
     },
   ],
   help: ["Run `ascendant <command> --help` for command flags and examples"],
@@ -44,6 +45,14 @@ interface ParsedFlags {
 const TransitCommandInput = Schema.Struct({
   name: PersonName,
   moment: OffsetMoment,
+  planet: Chart.Planets,
+  direction: Schema.optional(Transit.TransitDirection),
+  kinds: Schema.optional(Schema.String),
+  count: Schema.optional(Schema.Finite),
+  targetLongitude: Schema.optional(Schema.Finite),
+  house: Schema.optional(Chart.Houses),
+  maxYears: Schema.optional(Schema.Finite),
+  precisionMinutes: Schema.optional(Schema.Finite),
 });
 
 interface TransitCommandInput extends Schema.Schema.Type<
@@ -148,6 +157,18 @@ function domainError(
       Match.instanceOf(PersonRecordConflict),
       (conflict) => new AxiError(conflict.message, "PERSON_RECORD_CONFLICT"),
     ),
+    Match.when(
+      Match.instanceOf(Transit.TransitValidationError),
+      (invalid) =>
+        new AxiError(invalid.message, "VALIDATION_ERROR", [TRANSIT_HELP]),
+    ),
+    Match.when(
+      Match.instanceOf(Transit.TransitSearchExhausted),
+      (exhausted) =>
+        new AxiError(exhausted.message, "TRANSIT_SEARCH_EXHAUSTED", [
+          `Found ${exhausted.found.length} events before the search window ran out; retry with a larger --max-years`,
+        ]),
+    ),
     Match.orElse(
       () =>
         new AxiError(fallback.message, fallback.code, [fallback.help]),
@@ -161,13 +182,44 @@ const transitWorkflow = Effect.fn("Ascendant.transitWorkflow")(function* (
   const parsed = parseFlags(
     "transit",
     args,
-    ["--name", "--moment"],
-    ["--name", "--moment"],
+    [
+      "--name",
+      "--moment",
+      "--planet",
+      "--direction",
+      "--kinds",
+      "--count",
+      "--target-longitude",
+      "--house",
+      "--max-years",
+      "--precision-minutes",
+    ],
+    ["--name", "--moment", "--planet"],
     TRANSIT_HELP,
   );
   const input = yield* Schema.decodeUnknownEffect(TransitCommandInput)({
     name: flagValue(parsed, "--name"),
     moment: flagValue(parsed, "--moment"),
+    planet: flagValue(parsed, "--planet"),
+    ...(parsed["--direction"] !== undefined
+      ? { direction: parsed["--direction"] }
+      : {}),
+    ...(parsed["--kinds"] !== undefined ? { kinds: parsed["--kinds"] } : {}),
+    ...(parsed["--count"] !== undefined
+      ? { count: Number(parsed["--count"]) }
+      : {}),
+    ...(parsed["--target-longitude"] !== undefined
+      ? { targetLongitude: Number(parsed["--target-longitude"]) }
+      : {}),
+    ...(parsed["--house"] !== undefined
+      ? { house: Number(parsed["--house"]) }
+      : {}),
+    ...(parsed["--max-years"] !== undefined
+      ? { maxYears: Number(parsed["--max-years"]) }
+      : {}),
+    ...(parsed["--precision-minutes"] !== undefined
+      ? { precisionMinutes: Number(parsed["--precision-minutes"]) }
+      : {}),
   }).pipe(
     Effect.mapError(
       (error) =>
@@ -175,12 +227,52 @@ const transitWorkflow = Effect.fn("Ascendant.transitWorkflow")(function* (
     ),
   );
 
-  return yield* calculateTransit(input.name, input.moment).pipe(
+  const kinds = yield* Effect.forEach(
+    (input.kinds ?? "sign-ingress").split(",").map((kind) => kind.trim()),
+    (kind) =>
+      Schema.decodeUnknownEffect(Transit.TransitKind)(kind).pipe(
+        Effect.mapError(
+          () =>
+            new AxiError(
+              `Unknown transit kind: ${kind}`,
+              "VALIDATION_ERROR",
+              [
+                "Valid kinds: sign-ingress, cusp-crossing, longitude-hit, station",
+                TRANSIT_HELP,
+              ],
+            ),
+        ),
+      ),
+  );
+  if (kinds.length === 0) {
+    return yield* Effect.fail(
+      new AxiError(
+        "At least one transit kind is required",
+        "VALIDATION_ERROR",
+        [TRANSIT_HELP],
+      ),
+    );
+  }
+
+  return yield* searchTransits(input.name, input.moment, {
+    planet: input.planet,
+    direction: input.direction ?? "forward",
+    kinds,
+    count: input.count ?? 5,
+    ...(input.targetLongitude !== undefined
+      ? { targetLongitude: input.targetLongitude }
+      : {}),
+    ...(input.house !== undefined ? { house: input.house } : {}),
+    ...(input.maxYears !== undefined ? { maxYears: input.maxYears } : {}),
+    ...(input.precisionMinutes !== undefined
+      ? { precisionMinutes: input.precisionMinutes }
+      : {}),
+  }).pipe(
     Effect.mapError((error) =>
       domainError(error, input.name, {
         code: "TRANSIT_FAILED",
-        message: "Unable to calculate transit",
-        help: "Verify the saved person record and transit moment, then retry",
+        message: "Unable to search transits",
+        help: "Verify the saved person record and search flags, then retry",
       }),
     ),
   );
@@ -257,7 +349,7 @@ const homeView = Effect.fn("Ascendant.homeView")(function* () {
         .map((name: string) => ({ name, status: "ready" })),
     },
     help: [
-      "Run `ascendant transit --name \"<name>\" --moment \"<ISO-8601>\"`",
+      "Run `ascendant transit --name \"<name>\" --moment \"<ISO-8601>\" --planet <graha>`",
       "Run `ascendant init-person --name \"<name>\" --moment \"<ISO-8601>\" --latitude <latitude> --longitude <longitude> [--sex Male|Female>]`",
     ],
   };
@@ -307,13 +399,22 @@ function commandHelp(command: string): string | null {
     Match.when("transit", () =>
       `${encode({
         command: "transit",
-        description: "Calculate a Vedic D1 transit at a saved person's location",
+        description: "Search transit events from a saved person's location",
         flags: {
           "--name": "Required saved person name",
-          "--moment": "Required offset-aware ISO 8601 transit moment",
+          "--moment": "Required offset-aware ISO 8601 start moment",
+          "--planet": "Required graha: Sun, Moon, Mars, Mercury, Venus, Jupiter, Saturn, Rahu, or Ketu",
+          "--direction": "Optional search direction: forward (default) or backward",
+          "--kinds": "Optional comma-separated kinds (default sign-ingress): sign-ingress, cusp-crossing, longitude-hit, station",
+          "--count": "Optional number of events from 1 to 100 (default 5)",
+          "--target-longitude": "Required for longitude-hit: sidereal longitude from 0 to 360",
+          "--house": "Required for cusp-crossing: natal house from 1 to 12",
+          "--max-years": "Optional search window in years (default 30)",
+          "--precision-minutes": "Optional refinement precision in minutes (default 1)",
         },
         examples: [
-          'ascendant transit --name "Ada" --moment "2026-08-27T22:00:00+05:30"',
+          'ascendant transit --name "Ada" --moment "2026-08-27T22:00:00+05:30" --planet Jupiter',
+          'ascendant transit --name "Ada" --moment "2026-08-27T22:00:00+05:30" --planet Saturn --kinds sign-ingress,station --count 3 --direction forward',
         ],
       })}\n`,
     ),
