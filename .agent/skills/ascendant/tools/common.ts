@@ -107,7 +107,7 @@ export const VedicAstroParams = AstroParams.Options.make({
 });
 
 export const KpAstroParams = AstroParams.Options.make({
-  ayanamsa: "Krishnamurti",
+  ayanamsa: "KrishnamurtiVP291",
   houseSystem: "Placidus",
 });
 
