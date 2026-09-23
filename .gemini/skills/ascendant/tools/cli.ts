@@ -1,11 +1,12 @@
 import { encode } from "@toon-format/toon";
-import { Chart, Transit } from "astro-ascendant";
+import { Chart, Swisseph, Transit } from "astro-ascendant";
 import { AxiError, exitCodeForError } from "axi-sdk-js";
-import { Effect, FileSystem, Match, Path, Schema } from "effect";
+import { Effect, FileSystem, Layer, Match, Path, Schema } from "effect";
 
 import { searchTransits } from "./check-transit.ts";
 import {
   AppLayer,
+  KpAstroParamsLayer,
   Latitude,
   Longitude,
   OffsetMoment,
@@ -13,15 +14,19 @@ import {
   PersonRecordConflict,
   PersonRecordNotFound,
   PlatformLayer,
+  readStoredPerson,
   Sex,
 } from "./common.ts";
 import { initializePersonFromInput } from "./init-person.ts";
+import { rulingPlanetsWorkflow } from "./ruling-planets.ts";
 
 const DESCRIPTION = "Calculate saved Vedic astrology records and search transits";
 const INIT_PERSON_HELP =
   "Run `ascendant init-person --name \"<name>\" --moment \"<ISO-8601>\" --latitude <latitude> --longitude <longitude> [--sex Male|Female]`";
 const TRANSIT_HELP =
-  "Run `ascendant transit --name \"<name>\" --moment \"<ISO-8601>\" --planet <graha> [--direction forward|backward] [--kinds sign-ingress,...] [--count <1-100>] [--target-longitude <0-360>] [--house <1-12>] [--max-years <years>] [--precision-minutes <minutes>]`";
+  "Run `ascendant transit --name \"<name>\" --moment \"<ISO-8601>\" --planet <graha> [--school kp|parashari] [--direction forward|backward] [--kinds sign-ingress,...] [--count <1-100>] [--target-longitude <0-360>] [--house <1-12>] [--max-years <years>] [--precision-minutes <minutes>]`";
+const RULING_PLANETS_HELP =
+  "Run `ascendant ruling-planets --moment \"<ISO-8601>\" (--name \"<name>\" | --latitude <latitude> --longitude <longitude>)`";
 const TOP_LEVEL_HELP = `${encode({
   command: "ascendant",
   description: DESCRIPTION,
@@ -33,6 +38,10 @@ const TOP_LEVEL_HELP = `${encode({
     {
       name: "transit",
       description: "Search upcoming or past transit events for a saved person",
+    },
+    {
+      name: "ruling-planets",
+      description: "Read KP ruling planets for a judgment moment and place",
     },
   ],
   help: ["Run `ascendant <command> --help` for command flags and examples"],
@@ -46,6 +55,7 @@ const TransitCommandInput = Schema.Struct({
   name: PersonName,
   moment: OffsetMoment,
   planet: Chart.Planets,
+  school: Schema.optional(Schema.Literals(["kp", "parashari"])),
   direction: Schema.optional(Transit.TransitDirection),
   kinds: Schema.optional(Schema.String),
   count: Schema.optional(Schema.Finite),
@@ -69,6 +79,17 @@ const InitPersonCommandInput = Schema.Struct({
 
 interface InitPersonCommandInput extends Schema.Schema.Type<
   typeof InitPersonCommandInput
+> {}
+
+const RulingPlanetsCommandInput = Schema.Struct({
+  moment: OffsetMoment,
+  name: Schema.optional(PersonName),
+  latitude: Schema.optional(Latitude),
+  longitude: Schema.optional(Longitude),
+});
+
+interface RulingPlanetsCommandInput extends Schema.Schema.Type<
+  typeof RulingPlanetsCommandInput
 > {}
 
 function parseFlags(
@@ -186,6 +207,7 @@ const transitWorkflow = Effect.fn("Ascendant.transitWorkflow")(function* (
       "--name",
       "--moment",
       "--planet",
+      "--school",
       "--direction",
       "--kinds",
       "--count",
@@ -201,6 +223,9 @@ const transitWorkflow = Effect.fn("Ascendant.transitWorkflow")(function* (
     name: flagValue(parsed, "--name"),
     moment: flagValue(parsed, "--moment"),
     planet: flagValue(parsed, "--planet"),
+    ...(parsed["--school"] !== undefined
+      ? { school: parsed["--school"] }
+      : {}),
     ...(parsed["--direction"] !== undefined
       ? { direction: parsed["--direction"] }
       : {}),
@@ -256,6 +281,7 @@ const transitWorkflow = Effect.fn("Ascendant.transitWorkflow")(function* (
 
   return yield* searchTransits(input.name, input.moment, {
     planet: input.planet,
+    school: input.school === "kp" ? "KP" : "Parashari",
     direction: input.direction ?? "forward",
     kinds,
     count: input.count ?? 5,
@@ -318,6 +344,72 @@ const initPersonWorkflow = Effect.fn("Ascendant.initPersonWorkflow")(
   },
 );
 
+const rulingPlanetsCliWorkflow = Effect.fn(
+  "Ascendant.rulingPlanetsCliWorkflow",
+)(function* (args: ReadonlyArray<string>) {
+  const parsed = parseFlags(
+    "ruling-planets",
+    args,
+    ["--name", "--moment", "--latitude", "--longitude"],
+    ["--moment"],
+    RULING_PLANETS_HELP,
+  );
+  const input = yield* Schema.decodeUnknownEffect(RulingPlanetsCommandInput)({
+    moment: flagValue(parsed, "--moment"),
+    ...(parsed["--name"] !== undefined ? { name: parsed["--name"] } : {}),
+    ...(parsed["--latitude"] !== undefined
+      ? { latitude: Number(parsed["--latitude"]) }
+      : {}),
+    ...(parsed["--longitude"] !== undefined
+      ? { longitude: Number(parsed["--longitude"]) }
+      : {}),
+  }).pipe(
+    Effect.mapError(
+      (error) =>
+        new AxiError(error.message, "VALIDATION_ERROR", [RULING_PLANETS_HELP]),
+    ),
+  );
+
+  let latitude = input.latitude;
+  let longitude = input.longitude;
+  if (latitude === undefined || longitude === undefined) {
+    if (input.name === undefined) {
+      return yield* Effect.fail(
+        new AxiError(
+          "Provide --latitude and --longitude, or --name of a saved person",
+          "VALIDATION_ERROR",
+          [RULING_PLANETS_HELP],
+        ),
+      );
+    }
+    const person = yield* readStoredPerson(input.name).pipe(
+      Effect.mapError((error) =>
+        domainError(error, input.name ?? "", {
+          code: "RULING_PLANETS_FAILED",
+          message: "Unable to read the saved person record",
+          help: "Verify the person name and current working directory, then retry",
+        }),
+      ),
+    );
+    latitude ??= person.latitude;
+    longitude ??= person.longitude;
+  }
+
+  return yield* rulingPlanetsWorkflow(
+    input.moment,
+    latitude,
+    longitude,
+  ).pipe(
+    Effect.mapError((error) =>
+      domainError(error, input.name ?? "", {
+        code: "RULING_PLANETS_FAILED",
+        message: "Unable to read ruling planets",
+        help: "Verify the judgment moment and place, then retry",
+      }),
+    ),
+  );
+});
+
 const homeView = Effect.fn("Ascendant.homeView")(function* () {
   const fs = yield* FileSystem.FileSystem;
   const path = yield* Path.Path;
@@ -360,10 +452,32 @@ function homeCommand(): Promise<Record<string, unknown>> {
 }
 
 function transitCommand(args: string[]): Promise<Record<string, unknown>> {
+  const schoolIndex = args.indexOf("--school");
+  const schoolValue = schoolIndex === -1 ? undefined : args[schoolIndex + 1];
+  const layer =
+    schoolValue === "kp"
+      ? Layer.mergeAll(PlatformLayer, KpAstroParamsLayer, Swisseph.SwissephLayer)
+      : AppLayer;
   return Effect.runPromise(
     transitWorkflow(args).pipe(
       Effect.map((output) => ({ ...output })),
-      Effect.provide(AppLayer),
+      Effect.provide(layer as typeof AppLayer),
+    ),
+  );
+}
+
+function rulingPlanetsCommand(
+  args: string[],
+): Promise<Record<string, unknown>> {
+  const layer = Layer.mergeAll(
+    PlatformLayer,
+    KpAstroParamsLayer,
+    Swisseph.SwissephLayer,
+  );
+  return Effect.runPromise(
+    rulingPlanetsCliWorkflow(args).pipe(
+      Effect.map((output) => ({ ...output })),
+      Effect.provide(layer as typeof AppLayer),
     ),
   );
 }
@@ -404,6 +518,7 @@ function commandHelp(command: string): string | null {
           "--name": "Required saved person name",
           "--moment": "Required offset-aware ISO 8601 start moment",
           "--planet": "Required graha: Sun, Moon, Mars, Mercury, Venus, Jupiter, Saturn, Rahu, or Ketu",
+          "--school": "Optional school: parashari (default, Lahiri/WholeSign) or kp (Krishnamurti/Placidus)",
           "--direction": "Optional search direction: forward (default) or backward",
           "--kinds": "Optional comma-separated kinds (default sign-ingress): sign-ingress, cusp-crossing, longitude-hit, station",
           "--count": "Optional number of events from 1 to 100 (default 5)",
@@ -415,6 +530,23 @@ function commandHelp(command: string): string | null {
         examples: [
           'ascendant transit --name "Ada" --moment "2026-08-27T22:00:00+05:30" --planet Jupiter',
           'ascendant transit --name "Ada" --moment "2026-08-27T22:00:00+05:30" --planet Saturn --kinds sign-ingress,station --count 3 --direction forward',
+          'ascendant transit --name "Ada" --moment "2026-08-27T22:00:00+05:30" --planet Jupiter --school kp',
+        ],
+      })}\n`,
+    ),
+    Match.when("ruling-planets", () =>
+      `${encode({
+        command: "ruling-planets",
+        description: "Read KP ruling planets for a judgment moment and place",
+        flags: {
+          "--moment": "Required offset-aware ISO 8601 judgment moment",
+          "--name": "Optional saved person name (uses their birthplace when --latitude/--longitude are absent)",
+          "--latitude": "Latitude from -90 to 90 (required without --name)",
+          "--longitude": "Longitude from -180 to 180 (required without --name)",
+        },
+        examples: [
+          'ascendant ruling-planets --moment "2026-09-23T10:00:00+05:30" --latitude 12.9716 --longitude 77.5946',
+          'ascendant ruling-planets --moment "2026-09-23T10:00:00+05:30" --name "Ada"',
         ],
       })}\n`,
     ),
@@ -448,6 +580,7 @@ function commandHandler(
   return Match.value(command).pipe(
     Match.when("init-person", () => initPersonCommand),
     Match.when("transit", () => transitCommand),
+    Match.when("ruling-planets", () => rulingPlanetsCommand),
     Match.orElse(() => undefined),
   );
 }

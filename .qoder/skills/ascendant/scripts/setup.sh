@@ -18,7 +18,7 @@ package_specs=(
   "@effect/platform-node-shared@4.0.0-rc.112"
   "@swisseph/node@1.3.1"
   "@toon-format/toon@4.1.1"
-  "astro-ascendant@3.1.0"
+  "astro-ascendant@3.2.0"
   "axi-sdk-js@0.1.11"
   "effect@4.0.0-rc.112"
 )

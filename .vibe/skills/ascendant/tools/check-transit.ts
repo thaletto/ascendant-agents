@@ -4,12 +4,15 @@ import { DateTime, Effect, Schema } from "effect";
 import {
   calculationContext,
   decodeMoment,
+  KpAstroParams,
   makeLocatedMoment,
   type OffsetMoment,
   type PersonName,
   readStoredPerson,
   VedicAstroParams,
 } from "./common.ts";
+
+export type TransitSchool = "KP" | "Parashari";
 
 export interface TransitSearchOptions {
   readonly planet: Chart.Planets;
@@ -20,6 +23,7 @@ export interface TransitSearchOptions {
   readonly house?: Chart.Houses;
   readonly maxYears?: number;
   readonly precisionMinutes?: number;
+  readonly school?: TransitSchool;
 }
 
 function formatEvent(event: Transit.TransitEvent) {
@@ -78,7 +82,10 @@ export const searchTransits = Effect.fn("Ascendant.searchTransits")(
 
     return {
       from: DateTime.formatIso(fromDate),
-      calculation: calculationContext("Parashari", VedicAstroParams),
+      calculation: calculationContext(
+        options.school ?? "Parashari",
+        options.school === "KP" ? KpAstroParams : VedicAstroParams,
+      ),
       events: events.map(formatEvent),
     };
   },

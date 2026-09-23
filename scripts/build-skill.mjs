@@ -225,7 +225,7 @@ function build() {
   });
   fs.writeFileSync(
     path.join(commandsDir, "ascendant.md"),
-    `${bridgeFrontmatter}\nCall skill({ name: "ascendant" }) and follow its \`Arguments\` and \`Routing\` sections to handle $ARGUMENTS.\n`,
+    `${bridgeFrontmatter}\nCall skill({ name: "ascendant" }) and follow its \`Dispatch\` and \`Readings\` sections to handle $ARGUMENTS.\n`,
     "utf-8",
   );
   console.log("✓ OpenCode: .opencode/commands/ascendant.md");
