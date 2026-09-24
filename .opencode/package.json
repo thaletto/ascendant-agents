@@ -4,7 +4,9 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "@opencode-ai/plugin": "1.18.23"
+    "@effect/platform-node-shared": "4.0.0-rc.112",
+    "@opencode/plugin": "2.0.16",
+    "effect": "4.0.0-rc.112"
   },
   "devDependencies": {
     "@types/node": "^24.0.0"
