@@ -19,11 +19,7 @@ import { initializePersonFromInput } from "./init-person.ts";
 import { kpLordChain } from "./kp-lords.ts";
 import { rulingPlanetsWorkflow } from "./ruling-planets.ts";
 
-const KpLayer = Layer.mergeAll(
-  PlatformLayer,
-  KpAstroParamsLayer,
-  Swisseph.SwissephLayer,
-);
+const KpLayer = Layer.mergeAll(PlatformLayer, KpAstroParamsLayer, Swisseph.SwissephLayer);
 
 describe("ruling planets", () => {
   test("returns five KP ruling planets with lord chains", async () => {
