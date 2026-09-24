@@ -47,13 +47,25 @@ const SOURCE_SUBTREES = ["instructions", "references", "scripts", "tools", "agen
  * versionInMetadata moves `version` under a `metadata` map (Codex layout).
  */
 const PROVIDERS = {
-  "claude-code": { configDir: ".claude", displayName: "Claude Code", fields: ["user-invocable", "argument-hint"] },
+  "claude-code": {
+    configDir: ".claude",
+    displayName: "Claude Code",
+    fields: ["user-invocable", "argument-hint"],
+  },
   cursor: { configDir: ".cursor", displayName: "Cursor", fields: [] },
   gemini: { configDir: ".gemini", displayName: "Gemini", fields: [] },
   kiro: { configDir: ".kiro", displayName: "Kiro", fields: [] },
-  opencode: { configDir: ".opencode", displayName: "OpenCode", fields: ["user-invocable", "argument-hint"] },
+  opencode: {
+    configDir: ".opencode",
+    displayName: "OpenCode",
+    fields: ["user-invocable", "argument-hint"],
+  },
   pi: { configDir: ".pi", displayName: "Pi", fields: [] },
-  grok: { configDir: ".grok", displayName: "Grok Build", fields: ["user-invocable", "argument-hint"] },
+  grok: {
+    configDir: ".grok",
+    displayName: "Grok Build",
+    fields: ["user-invocable", "argument-hint"],
+  },
   antigravity: { configDir: ".agent", displayName: "Antigravity", fields: [] },
 };
 
@@ -161,8 +173,13 @@ function readSkillsVersion() {
 function buildSkillMarkdown(frontmatter, body, { fields, version, versionInMetadata }) {
   const out = { name: frontmatter.name, description: frontmatter.description };
   if (version && !versionInMetadata) out.version = version;
-  if (fields.includes("user-invocable") && frontmatter["user-invocable"]) out["user-invocable"] = true;
-  if (fields.includes("argument-hint") && frontmatter["user-invocable"] && frontmatter["argument-hint"]) {
+  if (fields.includes("user-invocable") && frontmatter["user-invocable"])
+    out["user-invocable"] = true;
+  if (
+    fields.includes("argument-hint") &&
+    frontmatter["user-invocable"] &&
+    frontmatter["argument-hint"]
+  ) {
     out["argument-hint"] = frontmatter["argument-hint"];
   }
   if (version && versionInMetadata) out.metadata = { version };
@@ -220,7 +237,9 @@ function build() {
   );
   console.log("✓ OpenCode: .opencode/commands/ascendant.md");
 
-  console.log("\nBuild complete. Do not hand-edit generated SKILL.md copies; edit skills/ascendant/SKILL.src.md and rebuild.");
+  console.log(
+    "\nBuild complete. Do not hand-edit generated SKILL.md copies; edit skills/ascendant/SKILL.src.md and rebuild.",
+  );
 }
 
 try {
