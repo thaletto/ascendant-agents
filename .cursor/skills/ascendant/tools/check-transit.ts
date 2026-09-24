@@ -38,55 +38,45 @@ function formatEvent(event: Transit.TransitEvent) {
     provenance: { ...event.provenance },
     ...(event.calculation !== undefined
       ? {
-          chart: Schema.encodeSync(Chart.ChartCalculation)(
-            event.calculation,
-          ),
+          chart: Schema.encodeSync(Chart.ChartCalculation)(event.calculation),
         }
       : {}),
   };
 }
 
-export const searchTransits = Effect.fn("Ascendant.searchTransits")(
-  function* (
-    name: PersonName,
-    moment: OffsetMoment,
-    options: TransitSearchOptions,
-  ) {
-    const person = yield* readStoredPerson(name);
-    const fromDate = yield* decodeMoment(moment);
-    const from = makeLocatedMoment(
-      fromDate,
-      person.latitude,
-      person.longitude,
-    );
-    const events = yield* Transit.findTransits({
-      planet: options.planet,
-      from,
-      count: options.count,
-      direction: options.direction,
-      kinds: [...options.kinds],
-      ...(options.targetLongitude !== undefined
-        ? {
-            targetLongitude: options.targetLongitude as Chart.Longitude,
-          }
-        : {}),
-      ...(options.house !== undefined ? { house: options.house } : {}),
-      ...(options.maxYears !== undefined
-        ? { maxYears: options.maxYears }
-        : {}),
-      ...(options.precisionMinutes !== undefined
-        ? { precisionMinutes: options.precisionMinutes }
-        : {}),
-      includeCharts: [1],
-    });
+export const searchTransits = Effect.fn("Ascendant.searchTransits")(function* (
+  name: PersonName,
+  moment: OffsetMoment,
+  options: TransitSearchOptions,
+) {
+  const person = yield* readStoredPerson(name);
+  const fromDate = yield* decodeMoment(moment);
+  const from = makeLocatedMoment(fromDate, person.latitude, person.longitude);
+  const events = yield* Transit.findTransits({
+    planet: options.planet,
+    from,
+    count: options.count,
+    direction: options.direction,
+    kinds: [...options.kinds],
+    ...(options.targetLongitude !== undefined
+      ? {
+          targetLongitude: options.targetLongitude as Chart.Longitude,
+        }
+      : {}),
+    ...(options.house !== undefined ? { house: options.house } : {}),
+    ...(options.maxYears !== undefined ? { maxYears: options.maxYears } : {}),
+    ...(options.precisionMinutes !== undefined
+      ? { precisionMinutes: options.precisionMinutes }
+      : {}),
+    includeCharts: [1],
+  });
 
-    return {
-      from: DateTime.formatIso(fromDate),
-      calculation: calculationContext(
-        options.school ?? "Parashari",
-        options.school === "KP" ? KpAstroParams : VedicAstroParams,
-      ),
-      events: events.map(formatEvent),
-    };
-  },
-);
+  return {
+    from: DateTime.formatIso(fromDate),
+    calculation: calculationContext(
+      options.school ?? "Parashari",
+      options.school === "KP" ? KpAstroParams : VedicAstroParams,
+    ),
+    events: events.map(formatEvent),
+  };
+});
