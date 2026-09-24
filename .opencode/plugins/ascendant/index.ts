@@ -1,8 +1,4 @@
-import {
-  NodeChildProcessSpawner,
-  NodeFileSystem,
-  NodePath,
-} from "@effect/platform-node-shared";
+import { NodeChildProcessSpawner, NodeFileSystem, NodePath } from "@effect/platform-node-shared";
 import { Plugin } from "@opencode/plugin/effect";
 import { Tool } from "@opencode/schema/tool";
 import { Effect, Layer, Path, Schema, Scope, Stream } from "effect";
@@ -33,15 +29,11 @@ const InitPersonInput = Schema.Struct({
   ),
   latitude: Latitude.pipe(Schema.annotate({ description: "Birth latitude" })),
   longitude: Longitude.pipe(Schema.annotate({ description: "Birth longitude" })),
-  sex: Schema.optional(
-    Sex.pipe(Schema.annotate({ description: "Birth sex: Male or Female" })),
-  ),
+  sex: Schema.optional(Sex.pipe(Schema.annotate({ description: "Birth sex: Male or Female" }))),
 });
 
 const CheckTransitInput = Schema.Struct({
-  name: PersonName.pipe(
-    Schema.annotate({ description: "Name of an initialized person record" }),
-  ),
+  name: PersonName.pipe(Schema.annotate({ description: "Name of an initialized person record" })),
   moment: OffsetMoment.pipe(
     Schema.annotate({
       description: "Transit moment in ISO 8601 form with Z or an explicit UTC offset",
@@ -71,7 +63,9 @@ function runScript(
       ],
       { concurrency: "unbounded" },
     ).pipe(
-      Effect.mapError((cause) => toToolError(`Failed to read ${script} output: ${describeCause(cause)}`)),
+      Effect.mapError((cause) =>
+        toToolError(`Failed to read ${script} output: ${describeCause(cause)}`),
+      ),
     );
     if (exitCode !== 0) {
       const detail = stderr.join("").trim();
@@ -104,8 +98,7 @@ export default Plugin.define({
       yield* ctx.tool.transform((editor) => {
         editor.add({
           name: "ascendant_init_person",
-          description:
-            "Create or refresh one saved astrology record from exact birth data.",
+          description: "Create or refresh one saved astrology record from exact birth data.",
           input: InitPersonInput,
           execute: (args) =>
             runScript(
@@ -126,8 +119,7 @@ export default Plugin.define({
         });
         editor.add({
           name: "ascendant_check_transit",
-          description:
-            "Calculate a compact D1 transit for one saved person and moment.",
+          description: "Calculate a compact D1 transit for one saved person and moment.",
           input: CheckTransitInput,
           execute: (args) =>
             runScript(
