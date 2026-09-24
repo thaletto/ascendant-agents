@@ -9,7 +9,11 @@
     "check-transit": "node --experimental-strip-types skills/ascendant/tools/ascendant.ts transit",
     "test": "bun test",
     "build:skill": "node scripts/build-skill.mjs",
-    "typecheck": "tsc --project skills/ascendant/tsconfig.json --noEmit && tsc --project .opencode/tsconfig.json --noEmit"
+    "typecheck": "tsc --project skills/ascendant/tsconfig.json --noEmit && tsc --project .opencode/tsconfig.json --noEmit",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "format": "oxfmt skills/ascendant/tools scripts .opencode/plugins *.json .oxlintrc.json .oxfmtrc.json skills/ascendant/tsconfig.json .opencode/tsconfig.json",
+    "format:check": "npm run format -- --check"
   },
   "dependencies": {
     "@effect/platform-node-shared": "^4.0.0-rc.112",
@@ -19,6 +23,9 @@
     "effect": "^4.0.0-rc.112"
   },
   "devDependencies": {
+    "bun-types": "1.4.2",
+    "oxfmt": "^0.70.0",
+    "oxlint": "^1.85.0",
     "typescript": "7.0.2"
   },
   "overrides": {
