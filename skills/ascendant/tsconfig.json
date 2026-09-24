@@ -13,8 +13,8 @@
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
     "noUnusedLocals": true,
-    "noUnusedParameters": true
+    "noUnusedParameters": true,
+    "types": ["bun-types"]
   },
-  "include": ["tools/**/*.ts"],
-  "exclude": ["tools/**/*.test.ts"]
+  "include": ["tools/**/*.ts"]
 }
