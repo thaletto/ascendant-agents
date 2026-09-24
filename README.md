@@ -10,7 +10,7 @@ The Ascendant skill turns a saved birth record into evidence-backed astrology re
 
 - `init` creates or refreshes a reusable `persons/<name>/` record (Vedic charts and dasha, KP D1 and dasha, Ashtakavarga, Jaimini artifacts) from exact birth data;
 - `setup` installs calculation dependencies when `init` or transit tools must run, and replaces `./references` from the skill. smfs is not required.
-- `analysis` answers a reading or timing question from the saved record, grounding claims in stored charts and method references (KP for timing/yes-no, Parashari for promise/quality/synthesis).
+- `analysis` answers a reading or timing question from the saved record, grounding claims in stored charts and method references (KP system defaults, Parashari if explicitly asked).
 
 With no argument it infers one: birth data on a writable host means `init`, missing calculation dependencies when tools must run means `setup`, a life question with person evidence means `analysis`.
 
