@@ -21,9 +21,9 @@
  * `<skill-dir>` / `<ascendant-skill-dir>` tokens are resolved by the agent
  * at runtime to the directory holding SKILL.md, so they are portable.
  *
- * Version is read from .claude-plugin/plugin.json. Codex-flavored outputs
- * (.agents) carry it under `metadata.version` instead of top-level
- * `version`, per the OpenAI skills layout.
+ * Version is read from the portable root plugin.json. Codex-flavored outputs
+ * are gone (Codex loads via the portable root); only the .codex-plugin
+ * marketplace shim keeps its own `interface` manifest.
  *
  * Run: `node scripts/build-skill.mjs` (or `npm run build:skill`).
  * No dependencies.
@@ -50,21 +50,11 @@ const PROVIDERS = {
   "claude-code": { configDir: ".claude", displayName: "Claude Code", fields: ["user-invocable", "argument-hint"] },
   cursor: { configDir: ".cursor", displayName: "Cursor", fields: [] },
   gemini: { configDir: ".gemini", displayName: "Gemini", fields: [] },
-  dsh: { configDir: ".dsh", displayName: "DeepSeek Harness", fields: ["user-invocable"] },
-  agents: { configDir: ".agents", displayName: "Codex Repo Skills", fields: [], versionInMetadata: true },
-  github: { configDir: ".github", displayName: "GitHub Copilot", fields: ["user-invocable", "argument-hint"] },
   kiro: { configDir: ".kiro", displayName: "Kiro", fields: [] },
   opencode: { configDir: ".opencode", displayName: "OpenCode", fields: ["user-invocable", "argument-hint"] },
   pi: { configDir: ".pi", displayName: "Pi", fields: [] },
-  qoder: { configDir: ".qoder", displayName: "Qoder", fields: ["user-invocable", "argument-hint"] },
-  trae: { configDir: ".trae", displayName: "Trae", fields: ["user-invocable", "argument-hint"] },
-  "trae-cn": { configDir: ".trae-cn", displayName: "Trae China", fields: ["user-invocable", "argument-hint"] },
-  "rovo-dev": { configDir: ".rovodev", displayName: "Rovo Dev", fields: ["user-invocable", "argument-hint"] },
-  vibe: { configDir: ".vibe", displayName: "Mistral Vibe", fields: ["user-invocable"] },
-  veto: { configDir: ".veto", displayName: "Veto", fields: [] },
   grok: { configDir: ".grok", displayName: "Grok Build", fields: ["user-invocable", "argument-hint"] },
   antigravity: { configDir: ".agent", displayName: "Antigravity", fields: [] },
-  hermes: { configDir: ".hermes", displayName: "Hermes Agent", fields: [] },
 };
 
 function parseFrontmatter(content) {
@@ -163,8 +153,8 @@ function readSource() {
 }
 
 function readSkillsVersion() {
-  const pluginJson = JSON.parse(fs.readFileSync(path.join(ROOT_DIR, ".claude-plugin", "plugin.json"), "utf-8"));
-  if (!pluginJson.version) throw new Error(".claude-plugin/plugin.json must declare `version`");
+  const pluginJson = JSON.parse(fs.readFileSync(path.join(ROOT_DIR, "plugin.json"), "utf-8"));
+  if (!pluginJson.version) throw new Error("plugin.json must declare `version`");
   return pluginJson.version;
 }
 
