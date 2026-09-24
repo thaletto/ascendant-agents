@@ -1,26 +1,10 @@
-import {
-  NodeFileSystem,
-  NodePath,
-} from "@effect/platform-node-shared";
+import { NodeFileSystem, NodePath } from "@effect/platform-node-shared";
 import { decode, encode } from "@toon-format/toon";
 import { AstroParams, Chart } from "astro-ascendant";
 import * as Swisseph from "astro-ascendant/swisseph";
-import {
-  DateTime,
-  Effect,
-  FileSystem,
-  Layer,
-  Path,
-  Schema,
-} from "effect";
+import { DateTime, Effect, FileSystem, Layer, Path, Schema } from "effect";
 
-import {
-  Latitude,
-  Longitude,
-  OffsetMoment,
-  PersonName,
-  Sex,
-} from "./contract.ts";
+import { Latitude, Longitude, OffsetMoment, PersonName, Sex } from "./contract.ts";
 export { Latitude, Longitude, OffsetMoment, PersonName, Sex };
 
 export const StoredPerson = Schema.Struct({
@@ -65,11 +49,12 @@ export class ToonDecodingError extends Schema.TaggedError<ToonDecodingError>()(
   },
 ) {}
 
-const NodeServicesLayer: Layer.Layer<FileSystem.FileSystem | Path.Path> =
-  Layer.mergeAll(NodeFileSystem.layer, NodePath.layer);
+const NodeServicesLayer: Layer.Layer<FileSystem.FileSystem | Path.Path> = Layer.mergeAll(
+  NodeFileSystem.layer,
+  NodePath.layer,
+);
 
-export const PlatformLayer: Layer.Layer<FileSystem.FileSystem | Path.Path> =
-  NodeServicesLayer;
+export const PlatformLayer: Layer.Layer<FileSystem.FileSystem | Path.Path> = NodeServicesLayer;
 
 export const VedicAstroParams = AstroParams.Options.make({
   ayanamsa: "Lahiri",
@@ -93,10 +78,7 @@ export const AppLayer = Layer.mergeAll(
 export type CalculationSchool = "Parashari" | "KP";
 export type CalculationContext = ReturnType<typeof calculationContext>;
 
-export function calculationContext(
-  school: CalculationSchool,
-  astroParams: AstroParams.Options,
-) {
+export function calculationContext(school: CalculationSchool, astroParams: AstroParams.Options) {
   return {
     school,
     ayanamsa: astroParams.ayanamsa,
@@ -105,9 +87,7 @@ export function calculationContext(
   };
 }
 
-export const decodeMoment = Effect.fn("Ascendant.decodeMoment")(function* (
-  input: OffsetMoment,
-) {
+export const decodeMoment = Effect.fn("Ascendant.decodeMoment")(function* (input: OffsetMoment) {
   return yield* Schema.decodeUnknownEffect(Schema.DateTimeUtcFromString)(input);
 });
 
@@ -134,10 +114,7 @@ function momentsEqual(left: OffsetMoment, right: OffsetMoment): boolean {
   }
 }
 
-export function personRecordMatches(
-  left: StoredPerson,
-  right: StoredPerson,
-): boolean {
+export function personRecordMatches(left: StoredPerson, right: StoredPerson): boolean {
   return (
     left.schemaVersion === right.schemaVersion &&
     left.name === right.name &&
@@ -148,10 +125,7 @@ export function personRecordMatches(
   );
 }
 
-export const writeToon = Effect.fn("Ascendant.writeToon")(function* (
-  file: string,
-  value: unknown,
-) {
+export const writeToon = Effect.fn("Ascendant.writeToon")(function* (file: string, value: unknown) {
   const fs = yield* FileSystem.FileSystem;
   const toon = yield* Effect.try({
     try: () => `${encode(value)}\n`,
@@ -165,9 +139,9 @@ export const writeToon = Effect.fn("Ascendant.writeToon")(function* (
   yield* fs.writeFileString(file, toon);
 });
 
-const readToonStoredPersonFile = Effect.fn(
-  "Ascendant.readToonStoredPersonFile",
-)(function* (inputFile: string) {
+const readToonStoredPersonFile = Effect.fn("Ascendant.readToonStoredPersonFile")(function* (
+  inputFile: string,
+) {
   const fs = yield* FileSystem.FileSystem;
   const contents = yield* fs.readFileString(inputFile);
   const decoded = yield* Effect.try({
@@ -181,40 +155,36 @@ const readToonStoredPersonFile = Effect.fn(
   return yield* Schema.decodeUnknownEffect(StoredPerson)(decoded);
 });
 
-export const readStoredPerson = Effect.fn("Ascendant.readStoredPerson")(
+export const readStoredPerson = Effect.fn("Ascendant.readStoredPerson")(function* (
+  name: PersonName,
+) {
+  const fs = yield* FileSystem.FileSystem;
+  const path = yield* Path.Path;
+  const inputFile = path.join("persons", name, "input.txt");
+
+  if (!(yield* fs.exists(inputFile))) {
+    return yield* new PersonRecordNotFound({
+      file: inputFile,
+      message: `No initialized person record exists for ${name}`,
+    });
+  }
+
+  return yield* readToonStoredPersonFile(inputFile);
+});
+
+export const readLegacyToonStoredPerson = Effect.fn("Ascendant.readLegacyToonStoredPerson")(
   function* (name: PersonName) {
-    const fs = yield* FileSystem.FileSystem;
     const path = yield* Path.Path;
-    const inputFile = path.join("persons", name, "input.txt");
-
-    if (!(yield* fs.exists(inputFile))) {
-      return yield* new PersonRecordNotFound({
-        file: inputFile,
-        message: `No initialized person record exists for ${name}`,
-      });
-    }
-
-    return yield* readToonStoredPersonFile(inputFile);
+    return yield* readToonStoredPersonFile(path.join("persons", name, "input.toon"));
   },
 );
 
-export const readLegacyToonStoredPerson = Effect.fn(
-  "Ascendant.readLegacyToonStoredPerson",
-)(function* (name: PersonName) {
-  const path = yield* Path.Path;
-  return yield* readToonStoredPersonFile(
-    path.join("persons", name, "input.toon"),
-  );
-});
-
-export const readLegacyStoredPerson = Effect.fn(
-  "Ascendant.readLegacyStoredPerson",
-)(function* (name: PersonName) {
+export const readLegacyStoredPerson = Effect.fn("Ascendant.readLegacyStoredPerson")(function* (
+  name: PersonName,
+) {
   const fs = yield* FileSystem.FileSystem;
   const path = yield* Path.Path;
   const inputFile = path.join("persons", name, "input.json");
   const contents = yield* fs.readFileString(inputFile);
-  return yield* Schema.decodeUnknownEffect(
-    Schema.fromJsonString(StoredPerson),
-  )(contents);
+  return yield* Schema.decodeUnknownEffect(Schema.fromJsonString(StoredPerson))(contents);
 });
