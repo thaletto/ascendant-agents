@@ -1,0 +1,13 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "ignorePatterns": [
+    ".agent/skills/**",
+    ".claude/skills/**",
+    ".cursor/skills/**",
+    ".gemini/skills/**",
+    ".grok/skills/**",
+    ".kiro/skills/**",
+    ".opencode/skills/**",
+    ".pi/skills/**"
+  ]
+}
