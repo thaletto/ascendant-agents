@@ -24,12 +24,9 @@ describe("initializePerson chart schools", () => {
 
     try {
       const result = await Effect.runPromise(
-        initializePersonFromInput(
-          ADA.name,
-          ADA.moment,
-          ADA.latitude,
-          ADA.longitude,
-        ).pipe(Effect.provide(AppLayer)),
+        initializePersonFromInput(ADA.name, ADA.moment, ADA.latitude, ADA.longitude).pipe(
+          Effect.provide(AppLayer),
+        ),
       );
 
       expect(result.artifacts.charts).toBe(16);
