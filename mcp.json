@@ -3,7 +3,7 @@
   "mcpServers": {
     "ascendant": {
       "type": "streamable-http",
-      "url": "https://ascendant.example.com/mcp"
+      "url": "https://ascendant-mcp.vercel.app/api/mcp"
     }
   }
 }
