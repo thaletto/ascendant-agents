@@ -4,9 +4,9 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "@effect/platform-node-shared": "4.0.0-rc.112",
+    "@effect/platform-node-shared": "4.0.1",
     "@opencode/plugin": "2.0.16",
-    "effect": "4.0.0-rc.112"
+    "effect": "4.0.1"
   },
   "devDependencies": {
     "@types/node": "^24.0.0"

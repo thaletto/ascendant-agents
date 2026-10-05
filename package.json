@@ -9,18 +9,22 @@
     "check-transit": "node --experimental-strip-types skills/ascendant/tools/ascendant.ts transit",
     "test": "bun test",
     "build:skill": "node scripts/build-skill.mjs",
-    "typecheck": "tsc --project skills/ascendant/tsconfig.json --noEmit && tsc --project .opencode/tsconfig.json --noEmit",
+    "mcp:serve": "bun mcp-server/server.ts",
+    "mcp:stdio": "bun mcp-server/stdio.ts",
+    "typecheck": "tsc --project skills/ascendant/tsconfig.json --noEmit && tsc --project mcp-server/tsconfig.json --noEmit && tsc --project .opencode/tsconfig.json --noEmit",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
-    "format": "oxfmt skills/ascendant/tools scripts .opencode/plugins *.json .oxlintrc.json .oxfmtrc.json skills/ascendant/tsconfig.json .opencode/tsconfig.json",
+    "format": "oxfmt skills/ascendant/tools scripts mcp-server api .opencode/plugins *.json .oxlintrc.json .oxfmtrc.json skills/ascendant/tsconfig.json mcp-server/tsconfig.json .opencode/tsconfig.json",
     "format:check": "npm run format -- --check"
   },
   "dependencies": {
-    "@effect/platform-node-shared": "^4.0.0-rc.112",
+    "@effect/platform-node-shared": "^4.0.1",
+    "@modelcontextprotocol/sdk": "^1.32.1",
     "@toon-format/toon": "4.1.1",
-    "astro-ascendant": "3.2.0",
+    "astro-ascendant": "4.0.1",
     "axi-sdk-js": "0.1.11",
-    "effect": "^4.0.0-rc.112"
+    "effect": "^4.0.1",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "bun-types": "1.4.2",
