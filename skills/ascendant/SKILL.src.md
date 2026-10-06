@@ -86,8 +86,10 @@ file's `calculation` object is `school: KP`, `ayanamsa: KrishnamurtiVP291`,
 `houseSystem: Placidus`, `dashaSystem: Vimshottari`. This one file already
 carries the significator tables. Do not recompute them by hand:
 
-- `chart.houses[N].signLord/starLord/subLord` + `cuspLords`/`planetLords`
-  (sign → sub-sub chains)
+- `chart.houses[N].signLord/starLord/subLord` (cusps only) + `cuspLords`/`planetLords`
+  (sign → sub-sub chains). Note: `chart.houses[N].planets[M]` carries no
+  star/sub lord — join planet star/sub by `planetLords` name, which now carries
+  `house/longitude/sign/star/pada` per planet (and `Lagna`).
 - `planetSignifications` (Levels 1-4 per planet, Rahu/Ketu `agent` resolved)
 - `houseSignificators` (Levels 1-4 per house)
 - natal `rulingPlanets`

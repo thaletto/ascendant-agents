@@ -28,6 +28,38 @@ const VIMSHOTTARI_YEARS: Record<KpLord, number> = {
 
 const STAR_SPAN = 360 / 27;
 
+const STARS = [
+  "Ashwini",
+  "Bharani",
+  "Krittika",
+  "Rohini",
+  "Mrigashira",
+  "Ardra",
+  "Punarvasu",
+  "Pushya",
+  "Ashlesha",
+  "Magha",
+  "Purva Phalguni",
+  "Uttara Phalguni",
+  "Hasta",
+  "Chitra",
+  "Swati",
+  "Vishakha",
+  "Anuradha",
+  "Jyeshtha",
+  "Mula",
+  "Purva Ashadha",
+  "Uttara Ashadha",
+  "Shravana",
+  "Dhanishta",
+  "Shatabhisha",
+  "Purva Bhadrapada",
+  "Uttara Bhadrapada",
+  "Revati",
+] as const;
+
+export type StarName = (typeof STARS)[number];
+
 const SIGN_LORDS = [
   "Mars",
   "Venus",
@@ -74,6 +106,16 @@ export function signLordOf(longitude: number): SignLord {
   return SIGN_LORDS[signIndex] ?? "Mars";
 }
 
+export function starNameOf(longitude: number): StarName {
+  const index = Math.floor(normalizeLongitude(longitude) / STAR_SPAN);
+  return STARS[index % STARS.length] ?? "Ashwini";
+}
+
+export function padaOf(longitude: number): 1 | 2 | 3 | 4 {
+  const offset = normalizeLongitude(longitude) % STAR_SPAN;
+  return Math.floor((offset / STAR_SPAN) * 4 + 1) as 1 | 2 | 3 | 4;
+}
+
 export function starLordOf(longitude: number): KpLord {
   const index = Math.floor(normalizeLongitude(longitude) / STAR_SPAN);
   return STAR_LORD_CYCLE[index % STAR_LORD_CYCLE.length] ?? "Ketu";
@@ -114,26 +156,68 @@ export interface NamedKpLordChain extends KpLordChain {
   readonly name: string;
 }
 
+export interface CuspLordDetails extends NamedKpLordChain {
+  readonly house: Chart.Houses;
+  readonly longitude: number;
+  readonly sign: string;
+  readonly star: StarName;
+  readonly pada: 1 | 2 | 3 | 4;
+}
+
+export interface PlanetLordDetails extends NamedKpLordChain {
+  readonly house: Chart.Houses;
+  readonly longitude: number;
+  readonly sign: string;
+  readonly star: StarName;
+  readonly pada: 1 | 2 | 3 | 4;
+}
+
 export function kpCuspAndPlanetLords(chart: Chart.Chart): {
-  readonly cuspLords: ReadonlyArray<NamedKpLordChain & { readonly house: Chart.Houses }>;
-  readonly planetLords: ReadonlyArray<NamedKpLordChain>;
+  readonly cuspLords: ReadonlyArray<CuspLordDetails>;
+  readonly planetLords: ReadonlyArray<PlanetLordDetails>;
 } {
   const cuspLords = Chart.Houses.literals.flatMap((house) => {
-    const cusp = chart.houses[house].cusp;
+    const chartHouse = chart.houses[house];
+    const cusp = chartHouse.cusp;
     if (cusp === undefined) return [];
-    return [{ house, name: `House ${house}`, ...kpLordChain(cusp) }];
+    return [
+      {
+        house,
+        name: `House ${house}`,
+        longitude: cusp,
+        sign: chartHouse.sign,
+        star: starNameOf(cusp),
+        pada: padaOf(cusp),
+        ...kpLordChain(cusp),
+      },
+    ];
   });
 
   const planetLords = Chart.Houses.literals.flatMap((house) => {
     const chartHouse = chart.houses[house];
     const planets = chartHouse.planets.map((planet) => ({
+      house,
       name: planet.name,
+      longitude: planet.longitude,
+      sign: planet.sign.name,
+      star: starNameOf(planet.longitude),
+      pada: padaOf(planet.longitude),
       ...kpLordChain(planet.longitude),
     }));
     const lagna =
       chartHouse.lagna === null
         ? []
-        : [{ name: "Lagna", ...kpLordChain(chartHouse.lagna.longitude) }];
+        : [
+            {
+              house,
+              name: "Lagna" as const,
+              longitude: chartHouse.lagna.longitude,
+              sign: chartHouse.lagna.sign.name,
+              star: starNameOf(chartHouse.lagna.longitude),
+              pada: padaOf(chartHouse.lagna.longitude),
+              ...kpLordChain(chartHouse.lagna.longitude),
+            },
+          ];
     return [...lagna, ...planets];
   });
 

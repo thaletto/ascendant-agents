@@ -58,14 +58,32 @@ describe("initializePerson chart schools", () => {
           houseSystem: string;
           dashaSystem: string;
         };
-        chart: { division: number; houses: Record<string, { cusp?: number }> };
+        chart: {
+          division: number;
+          houses: Record<string, { cusp?: number; planets?: Array<{ name: string }> }>;
+        };
         cuspLords: Array<{
           house: number;
+          longitude: number;
+          sign: string;
+          star: string;
+          pada: number;
           starLord: string;
           subLord: string;
           subSubLord: string;
         }>;
-        planetLords: Array<{ name: string; subSubLord: string }>;
+        planetLords: Array<{
+          name: string;
+          house: number;
+          longitude: number;
+          sign: string;
+          star: string;
+          pada: number;
+          signLord: string;
+          starLord: string;
+          subLord: string;
+          subSubLord: string;
+        }>;
       };
       const kpDasha = decode(
         await readFile(join(workspace, "persons", "Ada", "kp", "dasha.txt"), "utf8"),
@@ -95,6 +113,21 @@ describe("initializePerson chart schools", () => {
       expect(kpD1.chart.division).toBe(1);
       expect(kpD1.cuspLords).toHaveLength(12);
       expect(kpD1.planetLords.some((planet) => planet.name === "Lagna")).toBe(true);
+      for (const planet of kpD1.planetLords) {
+        expect(typeof planet.house).toBe("number");
+        expect(typeof planet.longitude).toBe("number");
+        expect(typeof planet.sign).toBe("string");
+        expect(typeof planet.star).toBe("string");
+        expect([1, 2, 3, 4]).toContain(planet.pada);
+        expect(typeof planet.starLord).toBe("string");
+        expect(typeof planet.subLord).toBe("string");
+      }
+      const chartPlanets = Object.values(kpD1.chart.houses).flatMap(
+        (house) => house.planets ?? [],
+      );
+      for (const planet of chartPlanets) {
+        expect(kpD1.planetLords.some((lord) => lord.name === planet.name)).toBe(true);
+      }
       expect(kpDasha.calculation.school).toBe("KP");
       expect(kpDasha.calculation.ayanamsa).toBe("KrishnamurtiVP291");
       expect(kpDasha.calculation.dashaSystem).toBe("Vimshottari");
