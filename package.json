@@ -18,15 +18,15 @@
   "dependencies": {
     "@effect/platform-node-shared": "^4.0.1",
     "@toon-format/toon": "4.1.1",
-    "astro-ascendant": "4.0.1",
-    "axi-sdk-js": "0.1.11",
+    "astro-ascendant": "4.0.4",
+    "axi-sdk-js": "0.1.13",
     "effect": "^4.0.1",
     "zod": "^4.6.5"
   },
   "devDependencies": {
     "bun-types": "1.4.2",
-    "oxfmt": "^0.70.0",
-    "oxlint": "^1.85.0",
+    "oxfmt": "^0.72.0",
+    "oxlint": "^1.87.0",
     "typescript": "7.0.2"
   },
   "overrides": {
