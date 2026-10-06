@@ -7,7 +7,7 @@
       "dependencies": {
         "@effect/platform-node-shared": "^4.0.1",
         "@toon-format/toon": "4.1.1",
-        "astro-ascendant": "4.0.4",
+        "astro-ascendant": "4.0.5",
         "axi-sdk-js": "0.1.13",
         "effect": "^4.0.1",
         "zod": "^4.6.5",
@@ -155,7 +155,7 @@
 
     "@typescript/typescript-win32-x64": ["@typescript/typescript-win32-x64@7.0.2", "", { "os": "win32", "cpu": "x64" }, "sha512-0BQ3HkAHHlKLSp1qRvf3SUhGpGsDuhB/jgFw75guyqbxJqEaS0Cw/VFO8i2nHglJUzQCRtMMR/IBAKE3ETMC4g=="],
 
-    "astro-ascendant": ["astro-ascendant@4.0.4", "", { "dependencies": { "@swisseph/node": "^1.4.0" }, "peerDependencies": { "effect": "^4.0.0" } }, "sha512-1lHGV2E5o3BQSLpyzL22s8Sz8PRrjk/jQdiTIZgWH/hKWaZyGkMhzVyk3GA9N+h7v9HLK9QPKmLp51g+QvRvNQ=="],
+    "astro-ascendant": ["astro-ascendant@4.0.5", "", { "dependencies": { "@swisseph/node": "^1.4.0" }, "peerDependencies": { "effect": "^4.0.0" } }, "sha512-1TH8VtLc6kgIei9Kh51+ol0+WpAcv6XLiQoqMuSoAsJ53lWZG4aAr1sqBs20iSGgL9gAQVjym9sdsbvSogGKqQ=="],
 
     "axi-sdk-js": ["axi-sdk-js@0.1.13", "", { "dependencies": { "@toon-format/toon": "^2.1.0" } }, "sha512-Ygh8qUN5kdwQ3ASw+BNzCKYpy5QYi18vfcEpqEOQOSrcyh6i4wChrPMtvVW0/3Sqho3xPH3CuFkP0QUma5oxxA=="],
 
