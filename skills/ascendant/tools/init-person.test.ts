@@ -65,6 +65,8 @@ describe("initializePerson chart schools", () => {
         cuspLords: Array<{
           house: number;
           longitude: number;
+          signDegree: number;
+          dms: string;
           sign: string;
           star: string;
           pada: number;
@@ -76,6 +78,8 @@ describe("initializePerson chart schools", () => {
           name: string;
           house: number;
           longitude: number;
+          signDegree: number;
+          dms: string;
           sign: string;
           star: string;
           pada: number;

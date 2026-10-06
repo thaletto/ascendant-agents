@@ -1,6 +1,13 @@
 import { describe, expect, test } from "bun:test";
 
-import { starLordOf, subLordOf, subSubLordOf } from "./kp-lords.ts";
+import {
+  dmsOf,
+  signDegreeOf,
+  signLordOf,
+  starLordOf,
+  subLordOf,
+  subSubLordOf,
+} from "./kp-lords.ts";
 
 describe("kp lord chain", () => {
   test("starts Ashwini with Ketu as star lord", () => {
@@ -13,5 +20,11 @@ describe("kp lord chain", () => {
     const insideVenusSub = (7 / 120) * (360 / 27) + 1e-9;
     expect(subLordOf(insideVenusSub)).toBe("Venus");
     expect(subSubLordOf(insideVenusSub)).toBe("Venus");
+  });
+
+  test("exposes sign-relative position for table lookup", () => {
+    expect(signLordOf(324)).toBe("Saturn");
+    expect(signDegreeOf(324)).toBeCloseTo(24, 10);
+    expect(dmsOf(324)).toBe("24°00'00\"");
   });
 });

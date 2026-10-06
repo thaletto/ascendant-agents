@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "ascendant",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "Laxman's agent skills for Astrological analysis of Birth Chart, Transits, Vimshottari Dasha, Ashtavarga Scores etc...",
   "author": {
     "name": "Laxman K R",

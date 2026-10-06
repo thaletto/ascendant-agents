@@ -159,6 +159,10 @@ export interface NamedKpLordChain extends KpLordChain {
 export interface CuspLordDetails extends NamedKpLordChain {
   readonly house: Chart.Houses;
   readonly longitude: number;
+  /** Degrees within the sign, 0 <= d < 30. */
+  readonly signDegree: number;
+  /** Human-readable D°M'S" within the sign, for table lookup. */
+  readonly dms: string;
   readonly sign: string;
   readonly star: StarName;
   readonly pada: 1 | 2 | 3 | 4;
@@ -167,9 +171,26 @@ export interface CuspLordDetails extends NamedKpLordChain {
 export interface PlanetLordDetails extends NamedKpLordChain {
   readonly house: Chart.Houses;
   readonly longitude: number;
+  /** Degrees within the sign, 0 <= d < 30. */
+  readonly signDegree: number;
+  /** Human-readable D°M'S" within the sign, for table lookup. */
+  readonly dms: string;
   readonly sign: string;
   readonly star: StarName;
   readonly pada: 1 | 2 | 3 | 4;
+}
+
+export function signDegreeOf(longitude: number): number {
+  return normalizeLongitude(longitude) % 30;
+}
+
+export function dmsOf(longitude: number): string {
+  const d = signDegreeOf(longitude);
+  const deg = Math.floor(d);
+  const minFloat = (d - deg) * 60;
+  const min = Math.floor(minFloat);
+  const sec = Math.round((minFloat - min) * 60);
+  return `${String(deg).padStart(2, "0")}°${String(min).padStart(2, "0")}'${String(sec).padStart(2, "0")}"`;
 }
 
 export function kpCuspAndPlanetLords(chart: Chart.Chart): {
@@ -185,6 +206,8 @@ export function kpCuspAndPlanetLords(chart: Chart.Chart): {
         house,
         name: `House ${house}`,
         longitude: cusp,
+        signDegree: signDegreeOf(cusp),
+        dms: dmsOf(cusp),
         sign: chartHouse.sign,
         star: starNameOf(cusp),
         pada: padaOf(cusp),
@@ -199,6 +222,8 @@ export function kpCuspAndPlanetLords(chart: Chart.Chart): {
       house,
       name: planet.name,
       longitude: planet.longitude,
+      signDegree: signDegreeOf(planet.longitude),
+      dms: dmsOf(planet.longitude),
       sign: planet.sign.name,
       star: starNameOf(planet.longitude),
       pada: padaOf(planet.longitude),
@@ -212,6 +237,8 @@ export function kpCuspAndPlanetLords(chart: Chart.Chart): {
               house,
               name: "Lagna" as const,
               longitude: chartHouse.lagna.longitude,
+              signDegree: signDegreeOf(chartHouse.lagna.longitude),
+              dms: dmsOf(chartHouse.lagna.longitude),
               sign: chartHouse.lagna.sign.name,
               star: starNameOf(chartHouse.lagna.longitude),
               pada: padaOf(chartHouse.lagna.longitude),

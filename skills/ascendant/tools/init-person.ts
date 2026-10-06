@@ -212,9 +212,9 @@ export const initializePerson = Effect.fn("Ascendant.initializePerson")(function
       }),
       writeToon(path.join(kpDirectory, "D1.txt"), {
         calculation: kpContext,
-        chart: Schema.encodeSync(Chart.Chart)(kpD1),
         cuspLords: kpLords.cuspLords,
         planetLords: kpLords.planetLords,
+        chart: Schema.encodeSync(Chart.Chart)(kpD1),
       }),
       writeToon(path.join(kpDirectory, "dasha.txt"), {
         calculation: kpContext,

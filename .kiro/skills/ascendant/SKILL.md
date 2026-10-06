@@ -1,7 +1,7 @@
 ---
 name: ascendant
 description: Save Birth Chart; Get KP-first answers with citations from KP and Parashara references. Parashari only on explicit request.
-version: 3.0.1
+version: 3.0.2
 ---
 
 ## Role
@@ -85,10 +85,16 @@ file's `calculation` object is `school: KP`, `ayanamsa: KrishnamurtiVP291`,
 `houseSystem: Placidus`, `dashaSystem: Vimshottari`. This one file already
 carries the significator tables. Do not recompute them by hand:
 
-- `chart.houses[N].signLord/starLord/subLord` (cusps only) + `cuspLords`/`planetLords`
-  (sign → sub-sub chains). Note: `chart.houses[N].planets[M]` carries no
-  star/sub lord — join planet star/sub by `planetLords` name, which now carries
-  `house/longitude/sign/star/pada` per planet (and `Lagna`).
+- `cuspLords`/`planetLords` are the single source of truth for lords
+  (each row: `house/name/longitude/signDegree/dms/sign/star/pada` +
+  `signLord/starLord/subLord/subSubLord`). Ignore
+  `chart.houses[N].signLord/starLord/subLord` — upstream duplicate without
+  sub-sub; when it disagrees with `cuspLords`, `cuspLords` wins.
+  `chart.houses[N].planets[M]` carries no star/sub lord — join planet
+  star/sub by `planetLords` name. Lord math lives in `tools/kp-lords.ts`:
+  sign=floor(lon/30), star=floor(lon/13°20') with cycle
+  Ketu→…→Mercury, sub=proportional Vimshottari slice from star lord,
+  sub-sub=recurse inside the sub.
 - `planetSignifications` (Levels 1-4 per planet, Rahu/Ketu `agent` resolved)
 - `houseSignificators` (Levels 1-4 per house)
 - natal `rulingPlanets`
