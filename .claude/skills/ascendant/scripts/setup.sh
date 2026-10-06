@@ -15,12 +15,12 @@ required_packages=(
 )
 
 package_specs=(
-  "@effect/platform-node-shared@4.0.0-rc.112"
-  "@swisseph/node@1.3.1"
+  "@effect/platform-node-shared@4.0.1"
+  "@swisseph/node@1.4.0"
   "@toon-format/toon@4.1.1"
-  "astro-ascendant@3.2.0"
-  "axi-sdk-js@0.1.11"
-  "effect@4.0.0-rc.112"
+  "astro-ascendant@4.0.4"
+  "axi-sdk-js@0.1.13"
+  "effect@4.0.1"
 )
 
 cd "${WORKING_DIRECTORY}"
