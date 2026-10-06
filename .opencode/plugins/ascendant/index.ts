@@ -44,15 +44,15 @@ const CheckTransitInput = Schema.Struct({
 const describeCause = (cause: unknown): string =>
   cause instanceof Error ? cause.message : String(cause);
 
-const toToolError = (message: string) => Tool.Error.make({ message });
-
 const runScriptBody = Effect.fn("runScript")(function* (
   script: string,
   args: ReadonlyArray<string>,
   directory: string,
 ) {
   const handle = yield* ChildProcess.make(script, [...args], { cwd: directory }).pipe(
-    Effect.mapError((cause) => toToolError(`Failed to spawn ${script}: ${describeCause(cause)}`)),
+    Effect.mapError((cause) =>
+      Tool.Error.make({ message: `Failed to spawn ${script}: ${describeCause(cause)}` }),
+    ),
   );
   const [stdout, stderr, exitCode] = yield* Effect.all(
     [
@@ -63,27 +63,25 @@ const runScriptBody = Effect.fn("runScript")(function* (
     { concurrency: "unbounded" },
   ).pipe(
     Effect.mapError((cause) =>
-      toToolError(`Failed to read ${script} output: ${describeCause(cause)}`),
+      Tool.Error.make({ message: `Failed to read ${script} output: ${describeCause(cause)}` }),
     ),
   );
   if (exitCode !== 0) {
     const detail = stderr.join("").trim();
-    return yield* toToolError(detail === "" ? `${script} exited with code ${exitCode}` : detail);
+    return yield* Tool.Error.make({
+      message: detail === "" ? `${script} exited with code ${exitCode}` : detail,
+    });
   }
   return stdout.join("").trim();
 });
 
-function runScript(
-  script: string,
-  args: ReadonlyArray<string>,
-  directory: string,
-) {
+function runScript(script: string, args: ReadonlyArray<string>, directory: string) {
   return runScriptBody(script, args, directory).pipe(
     Effect.timeout(60_000),
     Effect.mapError((cause) =>
       cause instanceof Tool.Error
         ? cause
-        : toToolError(`Timed out running ${script}: ${describeCause(cause)}`),
+        : Tool.Error.make({ message: `Timed out running ${script}: ${describeCause(cause)}` }),
     ),
     Effect.scoped,
     Effect.provide(NodeLive),
