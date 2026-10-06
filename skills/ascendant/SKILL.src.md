@@ -25,7 +25,7 @@ flowchart TD
     Q3 -- no --> SETUP[setup: instructions/setup.md]
     Q3 -- yes --> Q4{Explicit Parashari request?}
     SETUP --> Q4
-    Q4 -- yes --> PARA[Parashari second pass:\ncharts/ + dasha.txt,\nLahiri/WholeSign,\nlabelled separately]
+    Q4 -- yes --> PARA[Parashari second pass:\ncharts/ + dasha.md,\nLahiri/WholeSign,\nlabelled separately]
     Q4 -- no --> KP[KP analysis: Readings below]
     KP --> OUT[analysis output]
     PARA --> OUT
@@ -81,24 +81,21 @@ words.
 
 ## Step 2: Retrieve KP chart files
 
-Read `kp/D1.txt` and `kp/dasha.txt` from the person record. Confirm each
-file's `calculation` object is `school: KP`, `ayanamsa: KrishnamurtiVP291`,
-`houseSystem: Placidus`, `dashaSystem: Vimshottari`. This one file already
+Read `kp/D1.md` and `kp/dasha.md` from the person record. Confirm each
+file's calculation table is `School: KP`, `Ayanamsa: KrishnamurtiVP291`,
+`House system: Placidus`, `Dasha system: Vimshottari`. This one file already
 carries the significator tables. Do not recompute them by hand:
 
-- `cuspLords`/`planetLords` are the single source of truth for lords
-  (each row: `house/name/longitude/signDegree/dms/sign/star/pada` +
-  `signLord/starLord/subLord/subSubLord`). Ignore
-  `chart.houses[N].signLord/starLord/subLord` — upstream duplicate without
-  sub-sub; when it disagrees with `cuspLords`, `cuspLords` wins.
-  `chart.houses[N].planets[M]` carries no star/sub lord — join planet
-  star/sub by `planetLords` name. Lord math lives in `tools/kp-lords.ts`:
-  sign=floor(lon/30), star=floor(lon/13°20') with cycle
-  Ketu→…→Mercury, sub=proportional Vimshottari slice from star lord,
-  sub-sub=recurse inside the sub.
-- `planetSignifications` (Levels 1-4 per planet, Rahu/Ketu `agent` resolved)
-- `houseSignificators` (Levels 1-4 per house)
-- natal `rulingPlanets`
+- `Cusp Lords`/`Planet Lords` tables are the single source of truth for lords
+  (each row: house/name/longitude/sign degree/DMS/sign/star/pada +
+  Sign Lord/Star Lord/Sub Lord/Sub-Sub Lord). The `Houses` table carries the
+  same lords per house. Join planet star/sub by `Planet Lords` name. Lord math
+  lives in `tools/kp-lords.ts`: sign=floor(lon/30), star=floor(lon/13°20')
+  with cycle Ketu→…→Mercury, sub=proportional Vimshottari slice from star
+  lord, sub-sub=recurse inside the sub.
+- `Planet Significations` (Levels 1-4 per planet, Rahu/Ketu `agent` resolved)
+- `House Significators` (Levels 1-4 per house)
+- natal `Ruling Planets`
 
 Done when both files are in context with matching KP provenance, or the user
 has been asked for them (or `init` has been run on a writable host).
@@ -113,7 +110,7 @@ Read `{guidebook-root}/kp/birth-time-rectification.md` and run the RP test:
    (or `--latitude/--longitude` for the judgment place). This is the same
    call as Step 5; reuse one output for both steps.
 2. Read the natal Ascendant sign lord, star lord, and sub lord from
-   `kp/D1.txt:cuspLords` (house 1). The judgment RPs should appear among
+   `kp/D1.md Cusp Lords` (house 1). The judgment RPs should appear among
    these three Ascendant lords. Include Rahu/Ketu when they act as agent for
    an RP (conjoining, aspected by, or placed in its sign); drop RPs that sit
    in the star or sub of a retrograde planet when narrowing the list.
@@ -131,33 +128,31 @@ Read `{guidebook-root}/kp/birth-time-rectification.md` and run the RP test:
    unverified; use them only as cross-checks, never as the deciding test.
 
 Done when the verdict (`verified`, or `suspect with provisional moment X`)
-is stated with the RP output and `cuspLords` citations.
+is stated with the RP output and Cusp Lords citations.
 
 ## Step 4: Promise (cuspal sub-lord)
 
 Read `{guidebook-root}/kp/index.md` and the mapped section of
 `fundamental-principles.md`. Rule: if the sub-lord of the primary cusp
-signifies the group houses (Levels 1-4 in `planetSignifications`), the matter
+signifies the group houses (Levels 1-4 in the Planet Significations table), the matter
 is promised; if it signifies only detrimental houses, it is denied; if both,
 it fructifies in the matching dasha periods only. Done when the primary
 cuspal sub-lord and its signified houses are stated with
-`kp/D1.txt:planetSignifications.<planet>` citations.
+`kp/D1.md Planet Significations` citations.
 
 ## Step 5: Fruitful significators (ruling planets)
 
 Get judgment-moment ruling planets via
 `scripts/ruling-planets.sh --moment "<ISO-8601>" --name "<person>"`
-(or `--latitude/--longitude` for the judgment place). Intersect them with the
-`houseSignificators` of the group houses; common planets are the strongest.
+(or `--latitude/--longitude` for the judgment place). Intersect them with the House Significators of the group houses; common planets are the strongest.
 Apply the sub-lord elimination
 (`fundamental-principles.md:Selection of Significators`) next. Done when the
-shortlisted significators are named with both the RP output and the
-`houseSignificators` citation.
+shortlisted significators are named with both the RP output and the House Significators citation.
 
 ## Step 6: Timing (DBAS + transit)
 
 The event fructifies in the conjoined dasha/bhukti/antara of group
-significators from `kp/dasha.txt`. Pick dasa, bhukti, antara lords from the
+significators from `kp/dasha.md`. Pick dasa, bhukti, antara lords from the
 Step-5 shortlist. Refine with KP transit:
 `scripts/check-transit.sh --name "<person>" --moment "<ISO-8601>" --planet <graha> --school kp`.
 Dasa/bhukti/antara lords must transit group significators; Sun transit for
@@ -176,7 +171,7 @@ flowchart LR
     Q[Question] --> G[House group\n grouping.md]
     G --> R[BTR\njudgment RPs vs Asc lords]
     R --> P[Promise\ncuspal sub-lord]
-    P --> F[Fruitful significators\nRP ∩ houseSignificators]
+    P --> F[Fruitful significators\nRP ∩ House Significators]
     F --> T[Timing\nDBAS + kp transit]
     T --> J[Judgment +\nsupporting vs opposing]
 ```
@@ -184,7 +179,7 @@ flowchart LR
 ## Parashari (explicit request only)
 Only when the user explicitly requests Parashari (`parashari`, `parashara`,
 `vedic`, `Lahiri`, `varga`, `yoga`, `jaimini`): retrieve `charts/` (D1-D60)
-and `dasha.txt` (Lahiri, WholeSign, Vimshottari from the Lahiri Moon), read
+and `dasha.md` (Lahiri, WholeSign, Vimshottari from the Lahiri Moon), read
 `{guidebook-root}/parashari/index.md`, and emit a separately labelled second
 pass after the KP answer. Never mix KP placements with Parashari reading in
 one judgment.

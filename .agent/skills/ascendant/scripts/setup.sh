@@ -10,7 +10,6 @@ required_packages=(
   "@swisseph/node"
   "@toon-format/toon"
   "astro-ascendant"
-  "axi-sdk-js"
   "effect"
 )
 
@@ -18,8 +17,7 @@ package_specs=(
   "@effect/platform-node-shared@4.0.1"
   "@swisseph/node@1.4.0"
   "@toon-format/toon@4.1.1"
-  "astro-ascendant@4.0.5"
-  "axi-sdk-js@0.1.13"
+  "astro-ascendant@5.0.0"
   "effect@4.0.1"
 )
 

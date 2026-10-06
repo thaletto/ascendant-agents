@@ -33,7 +33,6 @@ else
 fi
 
 if [ ! -f "${WORKING_DIRECTORY}/node_modules/astro-ascendant/package.json" ] || \
-  [ ! -f "${WORKING_DIRECTORY}/node_modules/axi-sdk-js/package.json" ] || \
   [ ! -f "${WORKING_DIRECTORY}/node_modules/effect/package.json" ]; then
   print_error \
     "Ascendant dependencies are missing" \
@@ -57,6 +56,7 @@ cp "${SKILL_DIR}/tools/ascendant.ts" \
   "${SKILL_DIR}/tools/ruling-planets.ts" \
   "${SKILL_DIR}/tools/init-person.ts" \
   "${SKILL_DIR}/tools/kp-lords.ts" \
+  "${SKILL_DIR}/tools/markdown.ts" \
   "${SKILL_DIR}/tools/version.ts" \
   "${SKILL_DIR}/tools/package.json" \
   "${RUNTIME_TOOLS_DIR}/"

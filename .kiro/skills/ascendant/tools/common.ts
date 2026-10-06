@@ -1,5 +1,5 @@
 import { NodeFileSystem, NodePath } from "@effect/platform-node-shared";
-import { decode, encode } from "@toon-format/toon";
+import { decode } from "@toon-format/toon";
 import { AstroParams, Chart } from "astro-ascendant";
 import * as Swisseph from "astro-ascendant/swisseph";
 import { DateTime, Effect, FileSystem, Layer, Path, Schema } from "effect";
@@ -125,19 +125,56 @@ export function personRecordMatches(left: StoredPerson, right: StoredPerson): bo
   );
 }
 
-export const writeToon = Effect.fn("Ascendant.writeToon")(function* (file: string, value: unknown) {
+export const writeMarkdown = Effect.fn("Ascendant.writeMarkdown")(function* (
+  file: string,
+  content: string,
+) {
   const fs = yield* FileSystem.FileSystem;
-  const toon = yield* Effect.try({
-    try: () => `${encode(value)}\n`,
-    catch: (cause) =>
-      new ToonEncodingError({
-        file,
-        message: String(cause),
-      }),
-  });
-
-  yield* fs.writeFileString(file, toon);
+  yield* fs.writeFileString(file, content.endsWith("\n") ? content : `${content}\n`);
 });
+
+const FRONTMATTER_PATTERN = /^---\r?\n([\s\S]*?)\r?\n---/;
+
+function parseFrontmatterValue(value: string): string | number {
+  const trimmed = value.trim();
+  if (/^-?\d+(\.\d+)?$/.test(trimmed)) return Number(trimmed);
+  return trimmed;
+}
+
+function parseInputFrontmatter(contents: string, inputFile: string) {
+  const match = contents.match(FRONTMATTER_PATTERN);
+  if (match?.[1] === undefined) {
+    return Effect.fail(
+      new ToonDecodingError({
+        file: inputFile,
+        message: "Missing frontmatter in input.md",
+      }),
+    );
+  }
+  const fields: Record<string, string | number> = {};
+  for (const line of match[1].split(/\r?\n/)) {
+    if (line.trim() === "") continue;
+    const colon = line.indexOf(":");
+    if (colon <= 0) continue;
+    fields[line.slice(0, colon).trim()] = parseFrontmatterValue(line.slice(colon + 1));
+  }
+  return Schema.decodeUnknownEffect(StoredPerson)({
+    schemaVersion: 1,
+    name: fields["name"],
+    moment: fields["birth"] ?? fields["moment"],
+    latitude: fields["latitude"],
+    longitude: fields["longitude"],
+    ...(fields["sex"] !== undefined ? { sex: fields["sex"] } : {}),
+  }).pipe(
+    Effect.mapError(
+      (cause) =>
+        new ToonDecodingError({
+          file: inputFile,
+          message: String(cause),
+        }),
+    ),
+  );
+}
 
 const readToonStoredPersonFile = Effect.fn("Ascendant.readToonStoredPersonFile")(function* (
   inputFile: string,
@@ -160,16 +197,28 @@ export const readStoredPerson = Effect.fn("Ascendant.readStoredPerson")(function
 ) {
   const fs = yield* FileSystem.FileSystem;
   const path = yield* Path.Path;
-  const inputFile = path.join("persons", name, "input.txt");
+  const inputFile = path.join("persons", name, "input.md");
 
-  if (!(yield* fs.exists(inputFile))) {
-    return yield* new PersonRecordNotFound({
-      file: inputFile,
-      message: `No initialized person record exists for ${name}`,
-    });
+  if (yield* fs.exists(inputFile)) {
+    const contents = yield* fs.readFileString(inputFile);
+    return yield* parseInputFrontmatter(contents, inputFile);
   }
 
-  return yield* readToonStoredPersonFile(inputFile);
+  for (const legacy of ["input.txt", "input.toon", "input.json"] as const) {
+    const legacyFile = path.join("persons", name, legacy);
+    if (yield* fs.exists(legacyFile)) {
+      if (legacy === "input.json") {
+        const contents = yield* fs.readFileString(legacyFile);
+        return yield* Schema.decodeUnknownEffect(Schema.fromJsonString(StoredPerson))(contents);
+      }
+      return yield* readToonStoredPersonFile(legacyFile);
+    }
+  }
+
+  return yield* new PersonRecordNotFound({
+    file: inputFile,
+    message: `No initialized person record exists for ${name}`,
+  });
 });
 
 export const readLegacyToonStoredPerson = Effect.fn("Ascendant.readLegacyToonStoredPerson")(

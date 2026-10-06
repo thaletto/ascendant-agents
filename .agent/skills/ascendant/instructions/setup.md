@@ -38,4 +38,4 @@ bash "<ascendant-skill-dir>/scripts/init-person.sh" \
   --sex Female
 ```
 
-Done when stdout reports `created` or `refreshed` for `persons/<name>/` and that directory contains `input.txt`, `MEMORY.md`, `charts/`, `dasha.txt`, `kp/`, `sav.txt`, and `jaimini/`. Identical birth data refreshes; different birth data needs another name.
+Done when stdout reports `created` or `refreshed` for `persons/<name>/` and that directory contains `input.md`, `MEMORY.md`, `charts/`, `dasha.md`, `kp/`, `sav.md`, and `jaimini/`. Identical birth data refreshes; different birth data needs another name.
