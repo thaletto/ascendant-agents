@@ -372,9 +372,12 @@ function formatKpD1Markdown(
   chart: Chart.Chart,
 ): string {
   const kpLords = kpCuspAndPlanetLords(chart);
-  const base = formatChartMarkdown("KP Chart D1", calculation, chart);
-  return [
-    base.trimEnd(),
+  const sections = [
+    `# KP Chart D1 — D${chart.division}`,
+    "",
+    `Chart D${chart.division} (${calculation.houseSystem}, ${calculation.ayanamsa})`,
+    "",
+    calculationTable(calculation),
     "",
     "## Cusp Lords",
     "",
@@ -382,7 +385,6 @@ function formatKpD1Markdown(
       [
         "House",
         "Longitude",
-        "Sign Degree",
         "DMS",
         "Sign",
         "Star",
@@ -391,11 +393,11 @@ function formatKpD1Markdown(
         "Star Lord",
         "Sub Lord",
         "Sub-Sub Lord",
+        "Significations",
       ],
       kpLords.cuspLords.map((cusp) => [
         cusp.house,
-        cusp.longitude,
-        Number(cusp.signDegree.toFixed(6)),
+        Number(cusp.longitude.toFixed(4)),
         cusp.dms,
         cusp.sign,
         cusp.star,
@@ -404,6 +406,7 @@ function formatKpD1Markdown(
         cusp.starLord,
         cusp.subLord,
         cusp.subSubLord,
+        chart.houses[cusp.house]?.significations?.join(", ") || "—",
       ]),
     ),
     "",
@@ -414,7 +417,6 @@ function formatKpD1Markdown(
         "Name",
         "House",
         "Longitude",
-        "Sign Degree",
         "DMS",
         "Sign",
         "Star",
@@ -427,8 +429,7 @@ function formatKpD1Markdown(
       kpLords.planetLords.map((planet) => [
         planet.name,
         planet.house,
-        planet.longitude,
-        Number(planet.signDegree.toFixed(6)),
+        Number(planet.longitude.toFixed(4)),
         planet.dms,
         planet.sign,
         planet.star,
@@ -439,8 +440,13 @@ function formatKpD1Markdown(
         planet.subSubLord,
       ]),
     ),
-    "",
-  ].join("\n");
+  ];
+  const planetTable = planetSignificationTable(chart);
+  if (planetTable !== "") sections.push("", "## Planet Significations", "", planetTable);
+  const houseTableText = houseSignificatorTable(chart);
+  if (houseTableText !== "") sections.push("", "## House Significators", "", houseTableText);
+  sections.push("", "## Ruling Planets", "", rulingPlanetsTable(chart), "");
+  return sections.join("\n");
 }
 
 function formatCharaKarakasMarkdown(

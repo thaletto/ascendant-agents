@@ -1,7 +1,7 @@
 ---
 name: ascendant
 description: Save Birth Chart; Get KP-first answers with citations from KP and Parashara references. Parashari only on explicit request.
-version: 4.0.0
+version: 4.0.1
 user-invocable: true
 argument-hint: init | setup | analysis
 ---
