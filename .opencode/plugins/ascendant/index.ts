@@ -2,7 +2,7 @@ import { NodeChildProcessSpawner, NodeFileSystem, NodePath } from "@effect/platf
 import { Plugin } from "@opencode/plugin/effect";
 import { Tool } from "@opencode/schema/tool";
 import { Effect, Layer, Path, Schema, Scope, Stream } from "effect";
-import { ChildProcess } from "effect/unstable/process";
+import { ChildProcess } from "effect/process";
 import {
   Latitude,
   Longitude,
@@ -44,13 +44,13 @@ const CheckTransitInput = Schema.Struct({
 const describeCause = (cause: unknown): string =>
   cause instanceof Error ? cause.message : String(cause);
 
-const toToolError = (message: string): Tool.Error => Tool.Error.make({ message });
+const toToolError = (message: string) => Tool.Error.make({ message });
 
 function runScript(
   script: string,
   args: ReadonlyArray<string>,
   directory: string,
-): Effect.Effect<string, Tool.Error> {
+) {
   return Effect.gen(function* () {
     const handle = yield* ChildProcess.make(script, [...args], { cwd: directory }).pipe(
       Effect.mapError((cause) => toToolError(`Failed to spawn ${script}: ${describeCause(cause)}`)),
