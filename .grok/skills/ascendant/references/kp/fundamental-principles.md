@@ -207,13 +207,41 @@ Out of the significators mentioned above and select the fruitful significators a
 
 ## Finding out promises in a chart
 
-In the "House Grouping" section it was explained that - "for every important aspect of human life, one house has been given primary importance and few other houses have been given secondary importance." Standard rules for prediction are -
+In the "House Grouping" section, it was explained that for every important aspect of human life, one house is given primary importance, while other houses provide supporting or modifying indications.
 
-1. If the sublord of primary house under consideration is signifying house group related to the matter under consideration then the matter is going to fructify and the answer is positive.
+The **Sub Lord of the relevant primary cusp is the principal factor for determining whether an event is promised**. The Star Lord and other significators are then used to determine the houses whose results the Sub Lord delivers and to assess the nature and timing of the event.
 
-2. On the contrary, if it sublord of primary house is signifying detrimental houses (see good and bad houses above) alone then the matter will not fructify
+Standard rules for determining an event promise are:
 
-3. But, if it sublord of primary house is signifying house group as well as detrimental houses then the native will get both the results in different dasa period.
+1. **If the Sub Lord of the primary cusp signifies one or more houses belonging to the conductive house group for that matter, the event is promised.**
+
+2. **If the Sub Lord signifies only houses that are detrimental to the matter, the event is not promised.**
+
+3. **If the Sub Lord signifies both conductive and detrimental houses, both types of results may manifest. The actual manifestation depends on the relevant planetary significators and the operating Dasha, Bhukti and Antara periods.**
+
+4. **The presence of a single conductive house is not sufficient to ignore stronger contradictory significations. The complete set and hierarchy of significations of the relevant Sub Lord must be considered.**
+
+### Example: Marriage
+
+For marriage:
+
+* **7th house** is the primary house.
+* **2nd house** represents formation of family and is a supporting house.
+* **11th house** represents fulfillment and is a supporting house.
+
+Therefore, **2, 7 and 11 form the conductive house group for marriage**.
+
+In this methodology, **1, 6 and 10** are detrimental to marriage because they are 12th from the respective houses of the marriage group.
+
+Therefore:
+
+* If the **7th cusp Sub Lord signifies 2, 7 or 11**, marriage is indicated.
+* If the **7th cusp Sub Lord signifies only the detrimental houses 1, 6 or 10**, marriage is not indicated.
+* If the **7th cusp Sub Lord signifies both 2/7/11 and detrimental houses**, the chart contains mixed indications. Marriage may occur, but the result can involve delay, obstacles, separation or other complications depending on the complete significator structure and the operating Dasha-Bhukti-Antara periods.
+
+The Sub Lord therefore determines the **promise of the event**, while the relevant planetary significators and Dasha periods determine **how and when that promise is likely to fructify**.
+
+The same principle should be applied to other areas of life by replacing the marriage house group with the appropriate primary and supporting houses defined in the "House Grouping" section.
 
 **Example:**
 
