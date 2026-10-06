@@ -46,33 +46,39 @@ const describeCause = (cause: unknown): string =>
 
 const toToolError = (message: string) => Tool.Error.make({ message });
 
+const runScriptBody = Effect.fn("runScript")(function* (
+  script: string,
+  args: ReadonlyArray<string>,
+  directory: string,
+) {
+  const handle = yield* ChildProcess.make(script, [...args], { cwd: directory }).pipe(
+    Effect.mapError((cause) => toToolError(`Failed to spawn ${script}: ${describeCause(cause)}`)),
+  );
+  const [stdout, stderr, exitCode] = yield* Effect.all(
+    [
+      handle.stdout.pipe(Stream.decodeText, Stream.runCollect),
+      handle.stderr.pipe(Stream.decodeText, Stream.runCollect),
+      handle.exitCode,
+    ],
+    { concurrency: "unbounded" },
+  ).pipe(
+    Effect.mapError((cause) =>
+      toToolError(`Failed to read ${script} output: ${describeCause(cause)}`),
+    ),
+  );
+  if (exitCode !== 0) {
+    const detail = stderr.join("").trim();
+    return yield* toToolError(detail === "" ? `${script} exited with code ${exitCode}` : detail);
+  }
+  return stdout.join("").trim();
+});
+
 function runScript(
   script: string,
   args: ReadonlyArray<string>,
   directory: string,
 ) {
-  return Effect.gen(function* () {
-    const handle = yield* ChildProcess.make(script, [...args], { cwd: directory }).pipe(
-      Effect.mapError((cause) => toToolError(`Failed to spawn ${script}: ${describeCause(cause)}`)),
-    );
-    const [stdout, stderr, exitCode] = yield* Effect.all(
-      [
-        handle.stdout.pipe(Stream.decodeText, Stream.runCollect),
-        handle.stderr.pipe(Stream.decodeText, Stream.runCollect),
-        handle.exitCode,
-      ],
-      { concurrency: "unbounded" },
-    ).pipe(
-      Effect.mapError((cause) =>
-        toToolError(`Failed to read ${script} output: ${describeCause(cause)}`),
-      ),
-    );
-    if (exitCode !== 0) {
-      const detail = stderr.join("").trim();
-      return yield* toToolError(detail === "" ? `${script} exited with code ${exitCode}` : detail);
-    }
-    return stdout.join("").trim();
-  }).pipe(
+  return runScriptBody(script, args, directory).pipe(
     Effect.timeout(60_000),
     Effect.mapError((cause) =>
       cause instanceof Tool.Error
